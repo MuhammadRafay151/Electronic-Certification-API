@@ -6,6 +6,8 @@ const express = require('express');
 const path = require("path");
 const jwt = require("jsonwebtoken");
 var cors = require('cors')
+const helper= require('./helper')
+
 /**
  * App Variables
  */
@@ -24,6 +26,42 @@ app.post("/api/RegisterUser", (req, res) => {
 
 })
 
+app.get("/api/ca", async function(req, res)  {
+  try{
+    var response=await helper.getRegisteredUser("a12","Org1",true);
+    res.json(response);
+  }catch(err){
+    res.json(err);
+  }
+  
+})
+app.get('/users', async function (req, res) {
+  var username = "a1";
+  var orgName = "Org1";
+
+  if (!username) {
+      res.json(getErrorMessage('\'username\''));
+      return;
+  }
+  if (!orgName) {
+      res.json(getErrorMessage('\'orgName\''));
+      return;
+  }
+
+
+  let response = await helper.getRegisteredUser(username, orgName, true);
+
+  
+  if (response && typeof response !== 'string') {
+     
+      
+      res.json(response);
+  } else {
+     
+      res.json({ success: false, message: response });
+  }
+
+});
 app.get('/api/Login', (req, res) => {
   // ...
   const token = generateAccessToken({ username: req.query.username });
