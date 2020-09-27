@@ -6,7 +6,8 @@ const express = require('express');
 const path = require("path");
 const jwt = require("jsonwebtoken");
 var cors = require('cors')
-const helper= require('./helper')
+const helper= require('./helper');
+const { rejects } = require('assert');
 
 /**
  * App Variables
@@ -20,20 +21,20 @@ require('dotenv').config();
  * Routes Definitions
  */
 
-app.post("/api/RegisterUser", (req, res) => {
+app.post("/api/RegisterUser", async function(req, res){
 
-  res.send(200);
-
-})
-
-app.get("/api/ca", async function(req, res)  {
   try{
-    var response=await helper.getRegisteredUser("a12","Org1",true);
+    var response=await helper.getRegisteredUser(req.body.username,req.body.password,"Org1",true);
     res.json(response);
   }catch(err){
     res.json(err);
   }
-  
+
+})
+
+app.get("/api/ca", async function(req, res)  {
+  await helper.isUserRegistered("a12","Org1")
+  res.send(200)
 })
 app.get('/users', async function (req, res) {
   var username = "a1";
@@ -62,10 +63,16 @@ app.get('/users', async function (req, res) {
   }
 
 });
-app.get('/api/Login', (req, res) => {
+app.get('/api/Login', async function(req, res){
   // ...
-  const token = generateAccessToken({ username: req.query.username });
-  res.json({ accesstoken: token });
+  var isvalid= await helper.isUserRegistered(req.query.username,"Org1");
+  if(isvalid==true){
+    const token = generateAccessToken({ username: req.query.username });
+    res.json({ accesstoken: token });
+  }else{
+    res.status(401).send({toker:"Invalid..."})
+  }
+  
   // ...
 });
 
