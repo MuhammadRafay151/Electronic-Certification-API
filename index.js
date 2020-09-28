@@ -6,9 +6,11 @@ const express = require('express');
 const path = require("path");
 const jwt = require("jsonwebtoken");
 var cors = require('cors')
-const helper= require('./helper');
+const helper = require('./helper');
 const { rejects } = require('assert');
-
+const Invoke = require('./invoke');
+const Certificate = require('./Certificate');
+const certificate = require('./Certificate');
 /**
  * App Variables
  */
@@ -16,24 +18,25 @@ const app = express();
 app.use(express.json())
 app.use(cors())
 const port = process.env.PORT || "8000";
+const userorg = "Org1";
 require('dotenv').config();
 /**
  * Routes Definitions
  */
 
-app.post("/api/RegisterUser", async function(req, res){
+app.get("/api/RegisterUser", async function (req, res) {
 
-  try{
-    var response=await helper.getRegisteredUser(req.body.username,req.body.password,"Org1",true);
+  try {
+    var response = await helper.getRegisteredUser("as4", "as", "Org1", true);
     res.json(response);
-  }catch(err){
+  } catch (err) {
     res.json(err);
   }
 
 })
 
-app.get("/api/ca", async function(req, res)  {
-  await helper.isUserRegistered("a12","Org1")
+app.get("/api/ca", async function (req, res) {
+  await helper.isUserRegistered("a12", "Org1")
   res.send(200)
 })
 app.get('/users', async function (req, res) {
@@ -41,41 +44,56 @@ app.get('/users', async function (req, res) {
   var orgName = "Org1";
 
   if (!username) {
-      res.json(getErrorMessage('\'username\''));
-      return;
+    res.json(getErrorMessage('\'username\''));
+    return;
   }
   if (!orgName) {
-      res.json(getErrorMessage('\'orgName\''));
-      return;
+    res.json(getErrorMessage('\'orgName\''));
+    return;
   }
 
 
   let response = await helper.getRegisteredUser(username, orgName, true);
 
-  
+
   if (response && typeof response !== 'string') {
-     
-      
-      res.json(response);
+
+
+    res.json(response);
   } else {
-     
-      res.json({ success: false, message: response });
+
+    res.json({ success: false, message: response });
   }
 
 });
-app.get('/api/Login', async function(req, res){
+app.get('/api/Login', async function (req, res) {
   // ...
-  var isvalid= await helper.isUserRegistered(req.query.username,"Org1");
-  if(isvalid==true){
+  var isvalid = await helper.isUserRegistered(req.query.username, "Org1");
+  if (isvalid == true) {
     const token = generateAccessToken({ username: req.query.username });
     res.json({ accesstoken: token });
-  }else{
-    res.status(401).send({toker:"Invalid..."})
+  } else {
+    res.status(401).send({ toker: "Invalid..." })
   }
-  
+
   // ...
 });
+app.get('/api/IssueCertificate', async function (req, res) {
+  var c1 = new certificate();
+  c1.Name = "Muhammad rafay";
+  c1.email = "muhammadrafay@gmail.com";
+  c1.description = "test certificate";
+  c1.Organizations = userorg;
+  c1.Title = "Nodejs";
+  c1.key = "cert2";
+  try {
+    await Invoke.IssueCertificate(c1, "as4", userorg);
+  } catch (err) {
+    res.status(500)
+  }
 
+  res.status(200).send("Ok");
+})
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
 });

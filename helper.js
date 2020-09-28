@@ -137,7 +137,6 @@ const isUserRegistered =async  (username, userOrg) => {
 
     const userIdentity = await wallet.get(username);
     if (userIdentity) {
-       
         console.log(`An identity for the user ${username} exists in the wallet`);
         return true
     }
