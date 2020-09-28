@@ -6,14 +6,14 @@
 
 'use strict';
 
-const { Gateway, Wallets ,TxEventHandler, GatewayOptions, DefaultEventHandlerStrategies, TxEventHandlerFactory} = require('fabric-network');
+const { Gateway, Wallets, TxEventHandler, GatewayOptions, DefaultEventHandlerStrategies, TxEventHandlerFactory } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
-const helper=require('./helper');
+const helper = require('./helper');
 
-async function IssueCertificate(certificate,userid,UserOrg) {
+async function IssueCertificate(cert, userid, UserOrg) {
     try {
-         const ccpPath = path.resolve(__dirname, 'config', 'connection-org1.json');
+        const ccpPath = path.resolve(__dirname, 'config', 'connection-org1.json');
         let ccp = await helper.getCCP(UserOrg);
 
         // Create a new file system based wallet for managing identities.
@@ -42,19 +42,18 @@ async function IssueCertificate(certificate,userid,UserOrg) {
         // Submit the specified transaction.
         // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
         // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR12', 'Dave')
-  
-        await contract.submitTransaction('createCertificate',"cert230","Muhammad rafay","muhammadrafay@gmail.com","test certificate","Org1","Nodejs","certificate");
+
+         await contract.submitTransaction('createCertificate', cert.key, cert.name, cert.email, cert.description, UserOrg, cert.title, cert.docType);
         console.log('Transaction has been submitted');
 
         // Disconnect from the gateway.
         await gateway.disconnect();
-
-
+       
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+       
     }
 }
 console.log(helper.getCCP("Org1"));
 
-module.exports={IssueCertificate:IssueCertificate};
+module.exports = { IssueCertificate: IssueCertificate };

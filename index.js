@@ -78,21 +78,30 @@ app.get('/api/Login', async function (req, res) {
 
   // ...
 });
-app.get('/api/IssueCertificate', async function (req, res) {
+app.post('/api/IssueCertificate', async function (req, res) {
+  // var c1 = new certificate();
+  // c1.name = "Muhammad rafay";
+  // c1.email = "muhammadrafay@gmail.com";
+  // c1.description = "test certificate";
+  // c1.organizations = userorg;
+  // c1.title = "Nodejs";
+  // c1.key = "cert25";
   var c1 = new certificate();
-  c1.Name = "Muhammad rafay";
-  c1.email = "muhammadrafay@gmail.com";
-  c1.description = "test certificate";
-  c1.Organizations = userorg;
-  c1.Title = "Nodejs";
-  c1.key = "cert2";
+  c1.name = req.body.name;
+  c1.email = req.body.email;
+  c1.description = req.body.description;
+  c1.organizations = userorg;
+  c1.title = req.body.title;
+  c1.key = req.body.key;
   try {
-    await Invoke.IssueCertificate(c1, "as4", userorg);
+   var response= await Invoke.IssueCertificate(c1, "as4", userorg);
+   c1.message="Transaction Successful..."
+    res.status(200).json(c1);
   } catch (err) {
     res.status(500)
   }
 
-  res.status(200).send("Ok");
+ 
 })
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
