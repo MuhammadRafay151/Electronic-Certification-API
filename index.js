@@ -11,6 +11,7 @@ const { rejects } = require('assert');
 const Invoke = require('./invoke');
 const Certificate = require('./Certificate');
 const certificate = require('./Certificate');
+const query = require('./query');
 /**
  * App Variables
  */
@@ -94,14 +95,24 @@ app.post('/api/IssueCertificate', async function (req, res) {
   c1.title = req.body.title;
   c1.key = req.body.key;
   try {
-   var response= await Invoke.IssueCertificate(c1, "as4", userorg);
-   c1.message="Transaction Successful..."
+    var response = await Invoke.IssueCertificate(c1, "as4", userorg);
+    c1.message = "Transaction Successful..."
     res.status(200).json(c1);
   } catch (err) {
     res.status(500)
   }
 
- 
+
+})
+app.get('/api/VerifyCertificate/:id', async function (req, res) {
+
+  var result = await query.GetCertificate("as4", req.params.id);
+  if (result) {
+    res.status(200).json(result);
+  } else {
+    
+    res.status(200).json("Certificate Not Found...");
+  }
 })
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
