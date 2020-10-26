@@ -54,6 +54,6 @@ async function IssueCertificate(cert, userid, UserOrg) {
        
     }
 }
-console.log(helper.getCCP("Org1"));
+//console.log(helper.getCCP("Org1"));
 
 module.exports = { IssueCertificate: IssueCertificate };
