@@ -13,9 +13,9 @@ const certificate = require('./Certificate');
 const Signup = require('./Signup');
 const query = require('./query');
 const Auth=require("./Auth/Auth");
-const { authenticateToken } = require('./Auth/Auth');
+const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
-const signup = require('./Signup');
+const Login = require('./Login');
 const MongoClient = require('mongodb').MongoClient
 /**
  * App Variables
@@ -157,7 +157,6 @@ const signupCollection = db.collection('signup')
 
 app.post('/api/signup',  async function (req, res) {
   
-  console.log(req.body)
   var s1 = new Signup();
   s1.name=req.body.name
   s1.email=req.body.email
@@ -170,6 +169,26 @@ app.post('/api/signup',  async function (req, res) {
    
   })
   .catch(error => res.send(error))
+  
+});
+
+app.post('/api/login',  async function (req, res) {
+  
+  var l1 = new Login();
+  l1.email=req.body.email
+  l1.password=req.body.password
+  
+  
+  var result=await signupCollection.findOne({$and:[{email : l1.email, password: l1.password}]})
+    if(result!=null)
+    {
+      res.status(200).send(generateAccessToken(result.name))
+    }
+    else
+    {
+    res.status(401).send()
+   
+    }
   
 });
 
