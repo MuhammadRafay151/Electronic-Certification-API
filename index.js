@@ -10,16 +10,19 @@ const { rejects } = require('assert');
 const Invoke = require('./invoke');
 const Certificate = require('./Certificate');
 const certificate = require('./Certificate');
+const Signup = require('./Signup');
 const query = require('./query');
 const Auth=require("./Auth/Auth");
 const { authenticateToken } = require('./Auth/Auth');
-const account=require("./Routes/Account")
+const account=require("./Routes/Account");
+const signup = require('./Signup');
+const MongoClient = require('mongodb').MongoClient
 /**
  * App Variables
  */
 
 const app = express();
-app.use(express.json())
+app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || "8000";
 const userorg = "Org1";
@@ -138,3 +141,38 @@ app.get("/user", authenticateToken, (req, res) => {
 app.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`);
 });
+
+// ---------------------------------------------My code enjoying the weather----------------------------------------------------
+
+
+const connectionString = 'mongodb://127.0.0.1:27017'
+
+MongoClient.connect(connectionString, { useUnifiedTopology: true
+})
+.then(client => {
+
+const db = client.db('HLF')
+const signupCollection = db.collection('signup')
+
+
+app.post('/api/signup',  async function (req, res) {
+  
+  console.log(req.body)
+  var s1 = new Signup();
+  s1.name=req.body.name
+  s1.email=req.body.email
+  s1.password=req.body.password
+  
+  signupCollection.insertOne(s1)
+  .then(result => {
+    
+    res.status(200).send()
+   
+  })
+  .catch(error => res.send(error))
+  
+});
+
+})
+
+// --------------------------------------------------------------------------------------------------------------
