@@ -3,10 +3,6 @@ var router=express.Router()
 const user = require('../models/user');
 const Auth=require('../Auth/Auth')
 
-
-
-
-
 router.post('/signup',  async function (req, res) {
   
   var s1 = new user();
@@ -24,13 +20,13 @@ router.post('/signup',  async function (req, res) {
 });
 
 router.post('/login',  async function (req, res) {
-  
- 
  
   try{
    var response =await user.findOne({name:req.body.name,password:req.body.password})
+   if(response==null){
+      res.json({message:"Invalid username or password"})
+   }
    var token=Auth.generateAccessToken({uid:response._id})
-   console.log(token,response)
    res.json(token)
   }catch(err){
    res.send(err)
