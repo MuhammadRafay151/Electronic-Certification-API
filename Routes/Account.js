@@ -26,8 +26,10 @@ router.post('/login',  async function (req, res) {
    if(response==null){
       res.json({message:"Invalid username or password"})
    }
-   var token=Auth.generateAccessToken({uid:response._id})
+   else{
+      var token=await Auth.generateAccessToken({uid:response._id})
    res.json(token)
+   }
   }catch(err){
    res.send(err)
   }
