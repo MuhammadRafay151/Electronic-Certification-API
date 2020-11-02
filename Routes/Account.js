@@ -22,7 +22,7 @@ router.post('/signup',  async function (req, res) {
 router.post('/login',  async function (req, res) {
  
   try{
-   var response =await user.findOne({name:req.body.name,password:req.body.password})
+   var response =await user.findOne({email:req.body.email,password:req.body.password})
    if(response==null){
       res.json({message:"Invalid username or password"})
    }
