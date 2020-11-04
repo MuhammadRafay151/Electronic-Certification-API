@@ -8,14 +8,11 @@ var cors = require('cors')
 const helper = require('./helper');
 const { rejects } = require('assert');
 const Invoke = require('./invoke');
-const Certificate = require('./Certificate');
-const certificate = require('./Certificate');
-
+const certificate = require('./Routes/Certificate');
+const batch=require('./Routes/batch')
 const query = require('./query');
-const Auth=require("./Auth/Auth");
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
-const Login = require('./Login');
 const mongoose = require('mongoose')
 /**
  * App Variables
@@ -31,6 +28,9 @@ require('dotenv').config();
  * Routes Definitions
  */
 app.use("/api/account",account)
+app.use("/api/certificate",certificate)
+app.use("/api/batch",batch)
+mongoose.set('useFindAndModify', false);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
 
 
