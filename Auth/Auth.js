@@ -17,10 +17,21 @@ function generateAccessToken(username) {
   // expires after half and hour (1800 seconds = 30 minutes)
   return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
 }
-function Hello(){
-    return "hello"
+function CheckAuthorization(AllowedRoles) {
+  return async (req, res, next) => {
+    var UserRole=req.user.roles;
+    for (var i = 0; i < UserRole.length; i++) {
+      if (AllowedRoles.includes(UserRole[i])) {
+        next()
+      }
+    }
+    res.status('401').send()
+  }
+
 }
-module.exports={Hello:Hello,
-generateAccessToken:generateAccessToken,
-authenticateToken:authenticateToken
+module.exports = {
+
+  generateAccessToken: generateAccessToken,
+  authenticateToken: authenticateToken,
+  CheckAuthorization: CheckAuthorization
 }

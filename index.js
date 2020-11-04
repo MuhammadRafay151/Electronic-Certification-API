@@ -31,6 +31,7 @@ app.use("/api/account",account)
 app.use("/api/certificate",certificate)
 app.use("/api/batch",batch)
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
 
 

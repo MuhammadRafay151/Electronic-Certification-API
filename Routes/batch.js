@@ -1,17 +1,20 @@
 const express = require('express');
 const batch = require('../models/batch')
 const router = express.Router()
+const Auth=require('../Auth/Auth')
 
-
-router.get("/:id?", async (req, res) => {
-    if (req.params.id == null) {
+router.get("/:id?",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]),async (req, res) => {
+    var b1=new batch()
+    b1
+    // if (req.params.id == null) {
         
-        var result = await batch.find();
-        res.json(result)
-    } else {
-        var result = await batch.find({ _id: req.params.id });
-        res.json(result)
-    }
+    //     var result = await batch.find();
+    //     res.json(result)
+    // } else {
+    //     var result = await batch.find({ _id: req.params.id });
+    //     res.json(result)
+    // }
+    res.send("authroized")
 
 })
 router.post("/", async (req, res) => {
