@@ -9,6 +9,9 @@ router.post('/signup',  async function (req, res) {
   s1.name=req.body.name
   s1.email=req.body.email
   s1.password=req.body.password
+  s1.roles=req.body.roles
+  s1. organization.name=req.body.organization.name
+  s1.organization.id=req.body.organization.id
   try{
   var response= await s1.save()
    res.json({message:response})

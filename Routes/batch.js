@@ -23,10 +23,10 @@ router.post("/", async (req, res) => {
         logo: req.body.logo,
         signature: req.body.signature,
         createdby: {
-            name: req.body.issuedby.issuer_name,
-            email: req.body.issuedby.issuer_email,
-            org_name: req.body.issuedby.org_name,
-            org_id: req.body.issuedby.org_id,
+            name: req.body.createdby.issuer_name,
+            email: req.body.createdby.issuer_email,
+            org_name: req.body.createdby.org_name,
+            org_id: req.body.createdby.org_id,
         }
 
     })
