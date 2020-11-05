@@ -19,13 +19,18 @@ function generateAccessToken(username) {
 }
 function CheckAuthorization(AllowedRoles) {
   return async (req, res, next) => {
-    var UserRole=req.user.roles;
+    var UserRole = req.user.roles;
+    var isvalid = false;
     for (var i = 0; i < UserRole.length; i++) {
       if (AllowedRoles.includes(UserRole[i])) {
-        next()
+        isvalid = true
+        break;
       }
     }
-    res.status('401').send()
+    if (isvalid)
+      next()
+    else
+      res.status('401').send()
   }
 
 }

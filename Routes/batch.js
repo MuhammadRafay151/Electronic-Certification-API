@@ -4,17 +4,16 @@ const router = express.Router()
 const Auth=require('../Auth/Auth')
 
 router.get("/:id?",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]),async (req, res) => {
-    var b1=new batch()
-    b1
-    // if (req.params.id == null) {
+    
+    if (req.params.id == null) {
         
-    //     var result = await batch.find();
-    //     res.json(result)
-    // } else {
-    //     var result = await batch.find({ _id: req.params.id });
-    //     res.json(result)
-    // }
-    res.send("authroized")
+        var result = await batch.find();
+        res.json(result)
+    } else {
+        var result = await batch.find({ _id: req.params.id });
+        res.json(result)
+    }
+    // res.send("authroized")
 
 })
 router.post("/", async (req, res) => {
