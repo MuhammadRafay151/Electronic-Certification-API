@@ -10,10 +10,12 @@ const { rejects } = require('assert');
 const Invoke = require('./invoke');
 const certificate = require('./Routes/Certificate');
 const batch=require('./Routes/batch')
+const organization=require('./Routes/Organization');
 const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+
 /**
  * App Variables
  */
@@ -30,6 +32,7 @@ require('dotenv').config();
 app.use("/api/account",account)
 app.use("/api/certificate",certificate)
 app.use("/api/batch",batch)
+app.use("/api/organization",organization)
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
