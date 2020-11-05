@@ -18,7 +18,13 @@ const User = mongoose.Schema({
         name:{type:String,required:true},
         id:{type:String,required:true}
     },
-    roles:[]
+    roles:[],
+    status:{
+        type: String,
+        enum: ['enable', 'disable'],
+        default: 'enable'
+    }
+
 
 })
 
