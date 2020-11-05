@@ -10,6 +10,7 @@ const { rejects } = require('assert');
 const Invoke = require('./invoke');
 const certificate = require('./Routes/Certificate');
 const batch=require('./Routes/batch')
+const bcerts=require('./Routes/batch_certs')
 const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
@@ -30,6 +31,7 @@ require('dotenv').config();
 app.use("/api/account",account)
 app.use("/api/certificate",certificate)
 app.use("/api/batch",batch)
+app.use("/api/bcert",bcerts)
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
@@ -132,8 +134,8 @@ app.get("/", (req, res) => {
   res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
 });
 
-app.get("/user", authenticateToken, (req, res) => {
-  res.status(200).send(req.user);
+app.get("/user/:id", (req, res) => {
+  res.status(200).send(req.params.id);
 });
 
 app.listen(port, () => {

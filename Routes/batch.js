@@ -1,8 +1,11 @@
 const express = require('express');
 const batch = require('../models/batch')
 const router = express.Router()
+const user=require('../models/user')
 const Auth=require('../Auth/Auth')
 
+
+//create empty batches
 router.get("/:id?",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]),async (req, res) => {
     
     if (req.params.id == null) {
@@ -13,10 +16,10 @@ router.get("/:id?",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issu
         var result = await batch.find({ _id: req.params.id });
         res.json(result)
     }
-    // res.send("authroized")
+  
 
 })
-router.post("/", async (req, res) => {
+router.post("/",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]), async (req, res) => {
     var b1 = new batch({
         title: req.body.title,
         description: req.body.description,
@@ -41,12 +44,30 @@ router.post("/", async (req, res) => {
     }
 
 })
-router.put("/:id", async (req, res) => {
+router.put("/:id",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]), async (req, res) => {
 
-    res.send("sdf")
+    try {
+        var r1 = await batch.findByIdAndUpdate(req.params.id,{
+            title: req.body.title,
+            description: req.body.description,
+            expiry_date: req.body.expiry_date,
+            instructor_name: req.body.instructor_name,
+            logo: req.body.logo,
+            signature: req.body.signature,
+            $push:{"updatedby": {
+                name: req.body.updatedby.name,
+                email: req.body.updatedby.email,
+            }}
+           
+        },{new:true})
+        res.json(r1)
+    }
+    catch (err) {
+        res.json(err)
+    }
 
 })
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",Auth.authenticateToken,Auth.CheckAuthorization(["admin","issuer"]), async (req, res) => {
 
     var result = await batch.findByIdAndDelete(req.params.id)
     res.status(200).send(result)

@@ -31,7 +31,7 @@ router.post('/login', async function (req, res) {
          res.json({ message: "Invalid username or password" })
       }
       else {
-         var token = await Auth.generateAccessToken({ uid: response._id, roles: response.roles })
+         var token = await Auth.generateAccessToken({ uid: response._id,org_id:response.organization.id, roles: response.roles })
          res.json(token)
       }
    } catch (err) {
