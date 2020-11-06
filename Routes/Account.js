@@ -2,7 +2,7 @@ const express = require('express');
 var router = express.Router()
 const user = require('../models/user');
 const Auth = require('../Auth/Auth')
-
+var mongoose = require('mongoose');
 router.post('/signup', async function (req, res) {
 
    var s1 = new user();
@@ -31,8 +31,10 @@ router.post('/login', async function (req, res) {
          res.json({ message: "Invalid username or password" })
       }
       else {
-         var token = await Auth.generateAccessToken({ uid: response._id,org_id:response.organization.id, roles: response.roles })
-         res.json(token)
+         var token = await Auth.generateAccessToken({ uid: response._id,name:response.name, org_id: response.organization.id, roles: response.roles })
+         delete response._doc.password
+         response._doc.toke = token
+         res.json(response)
       }
    } catch (err) {
       res.send(err)
@@ -40,18 +42,37 @@ router.post('/login', async function (req, res) {
 
 });
 
-router.put('/ManageUser',  async function (req, res) {
-  
+router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "admin"]), async function (req, res) {
+   var flag = req.query.flag == 1
+   var querry = null
+   if (req.user.roles.includes("SuperAdmin")) {
+      querry = {
+         _id: mongoose.Types.ObjectId(req.body.id),
+
+      }
+   } else {
+      querry = {
+         _id: mongoose.Types.ObjectId(req.body.id),
+         "organization.id": req.user.org_id
+
+      }
+
+
+   }
    try {
-       var r1 = await user.findByIdAndUpdate(req.body.id,{
-         status:req.body.status
+
+      var r1 = await user.findOneAndUpdate(querry, {
+         status: { active: false }
       })
-       res.json(r1)
+      if (r1)
+         res.status(200).json({ active: flag })
+      else
+         res.status(404).send("user not found")
    }
    catch (err) {
-       res.json(err)
+      res.json(err)
    }
-   
+
 });
 
 module.exports = router

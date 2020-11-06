@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Organization = mongoose.Schema({
-    
+
     name: {
         type: String,
         required: true
@@ -11,34 +11,19 @@ const Organization = mongoose.Schema({
     },
     id: {
         type: String,
-        unique:true,
+        unique: true,
         required: true
     },
-    ecertcount:{
+    ecertcount: {
         type: Number,
         default: 0
     },
-    countupdate:{
-        date: {
-            type: Date,
-            default: Date.now()
-        },
-        name:{
-            type: String,
-            required: true
-        },
-        email:{
-            type: String,
-            required: true
-        },
-        countadded:{
-            type: Number
+
+    status: {
+        active: {
+            type: Boolean,
+            default: true
         }
-    },
-    status:{
-        type: String,
-        enum: ['enable', 'disable'],
-        default: 'enable'
     }
 
 })

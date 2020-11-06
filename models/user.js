@@ -20,9 +20,8 @@ const User = mongoose.Schema({
     },
     roles:[],
     status:{
-        type: String,
-        enum: ['enable', 'disable'],
-        default: 'enable'
+       active:Boolean
+        
     }
 
 
