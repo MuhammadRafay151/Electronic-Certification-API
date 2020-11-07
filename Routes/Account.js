@@ -28,13 +28,15 @@ router.post('/login', async function (req, res) {
    try {
       var response = await user.findOne({ email: req.body.email, password: req.body.password })
       if (response == null) {
-         res.json({ message: "Invalid username or password" })
-      }
-      else {
+         res.status(401).json({ message: "Invalid username or password" })
+      } 
+      else if(response.status.active==true){
          var token = await Auth.generateAccessToken({ uid: response._id,name:response.name, org_id: response.organization.id, roles: response.roles })
          delete response._doc.password
-         response._doc.toke = token
+         response._doc.token = token
          res.json(response)
+      }else{
+         res.status(403).json({ message: "Account has been disabled" })
       }
    } catch (err) {
       res.send(err)
