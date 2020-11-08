@@ -1,11 +1,13 @@
 const express = require('express');
-
+const auth=require('../Auth/Auth')
 const router = express.Router()
 const cert = require('../models/certificate');
-//code goes here
-
-router.post("/", async (req, res) => {
-
+const user = require('../models/user')
+var multer  = require('multer')
+var upload = multer()
+router.post("/",auth.authenticateToken,auth.CheckAuthorization(["SuperAdmin","Admin","Issuer"]),upload.any(), async (req, res) => {
+   
+    var u1 = await user.findById(req.user.uid)
     var c1 = new cert({
         title: req.body.title,
         description: req.body.description,
@@ -13,18 +15,18 @@ router.post("/", async (req, res) => {
         name: req.body.name,
         email: req.body.email,
         instructor_name: req.body.instructor_name,
-        logo: req.body.logo,
-        signature: req.body.signature,
+        logo: req.files[0].buffer.toString('base64'),
+        signature: req.files[1].buffer.toString('base64'),
         certificate_img: req.body.certificate_img,
         issuedby: {
-            issuer_name: req.body.issuedby.issuer_name,
-            issuer_email: req.body.issuedby.issuer_email,
-            org_name: req.body.issuedby.org_name,
-            org_id: req.body.issuedby.org_id,
+            issuer_name: u1.name,
+            issuer_email: u1.email,
+            org_name: u1.organization.name,
+            org_id: u1.organization.id,
         }
 
     })
-    
+
     try {
         var r1 = await c1.save()
         res.json(r1)
@@ -35,10 +37,10 @@ router.post("/", async (req, res) => {
 
 })
 router.put("/:id", async (req, res) => {
-    
-   
+
+
     try {
-        var r1 = await cert.findByIdAndUpdate(req.params.id,{
+        var r1 = await cert.findByIdAndUpdate(req.params.id, {
             title: req.body.title,
             description: req.body.description,
             expiry_date: req.body.expiry_date,
@@ -48,12 +50,14 @@ router.put("/:id", async (req, res) => {
             logo: req.body.logo,
             signature: req.body.signature,
             certificate_img: req.body.certificate_img,
-            $push:{"updatedby": {
-                name: req.body.updatedby.name,
-                email: req.body.updatedby.email,
-            }}
-           
-        },)
+            $push: {
+                "updatedby": {
+                    name: req.body.updatedby.name,
+                    email: req.body.updatedby.email,
+                }
+            }
+
+        })
         res.json(r1)
     }
     catch (err) {
@@ -62,7 +66,7 @@ router.put("/:id", async (req, res) => {
 })
 router.get("/:id?", async (req, res) => {
     if (req.params.id == null) {
-        
+
         var result = await cert.find();
         res.json(result)
     } else {

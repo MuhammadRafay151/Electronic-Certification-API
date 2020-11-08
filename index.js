@@ -11,6 +11,8 @@ const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
 const mongoose = require('mongoose');
 const count=require('./Routes/count')
+var multer  = require('multer')
+var upload = multer()
 /**
  * App Variables
  */
@@ -35,7 +37,11 @@ app.use("/api/organization",organization)
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
-
+app.post('/test',upload.any(),function(req,res){
+  var x=req.files[0].buffer.toString('base64')
+  
+  res.send(req.body.as)
+})
 
 
 
