@@ -1,12 +1,14 @@
 const express = require('express');
-const auth=require('../Auth/Auth')
+const auth = require('../Auth/Auth')
 const router = express.Router()
 const cert = require('../models/certificate');
 const user = require('../models/user')
-var multer  = require('multer')
+var multer = require('multer')
 var upload = multer()
-router.post("/",auth.authenticateToken,auth.CheckAuthorization(["SuperAdmin","Admin","Issuer"]),upload.any(), async (req, res) => {
-   
+var pagination = require('./../js/pagination');
+const { response } = require('express');
+router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), upload.any(), async (req, res) => {
+
     var u1 = await user.findById(req.user.uid)
     var c1 = new cert({
         title: req.body.title,
@@ -65,9 +67,16 @@ router.put("/:id", async (req, res) => {
     }
 })
 router.get("/:id?", async (req, res) => {
-    if (req.params.id == null) {
 
-        var result = await cert.find();
+    if (req.params.id == null) {
+        var perpage = 5
+        var pageno = req.query.pageno
+        if (isNaN(parseInt(pageno))) { pageno = 1 }
+        var result = await cert.find({}, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+        if (pageno == 1) {
+            var total = await cert.find().countDocuments();
+            result = { "list": result, totalcount: total }
+        } else { result = { "list": result } }
         res.json(result)
     } else {
         var result = await cert.find({ _id: req.params.id });
