@@ -84,9 +84,15 @@ router.get("/:id?", async (req, res) => {
     }
 })
 router.delete("/:id", async (req, res) => {
-    var c = await cert.findById(req.params.id)
-    var delres = await c.deleteOne()
-    res.status(200).send(delres)
+    try {
+
+        var c = await cert.findById(req.params.id)
+        var delres = await c.deleteOne()
+        res.status(200).send(delres)
+    }
+    catch (err) {
+        res.send(err)
+    }
 })
 
 module.exports = router

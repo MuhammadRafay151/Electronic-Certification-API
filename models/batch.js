@@ -3,6 +3,10 @@ const batch = mongoose.Schema({
     title: {
         type: String,
         required: true
+    }, 
+    batch_name: {
+        type: String,
+        required: true
     },
     description: {
         type: String,
@@ -18,7 +22,7 @@ const batch = mongoose.Schema({
     },
     instructor_name: {
         type: String,
-        required: true
+        required: false
     },
     logo: {
         type: String,

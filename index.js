@@ -11,8 +11,19 @@ const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account=require("./Routes/Account");
 const mongoose = require('mongoose');
 const count=require('./Routes/count')
+const fs = require('fs').promises;
 var multer  = require('multer')
-var upload = multer()
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix)
+  }
+})
+
+var upload = multer({ storage: storage })
 /**
  * App Variables
  */
@@ -37,14 +48,17 @@ app.use("/api/organization",organization)
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
-app.post('/test',upload.any(),function(req,res){
-  var x=req.files[0].buffer.toString('base64')
-  
-  res.send(req.body.as)
+var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
+app.post('/test',cpUpload,async (req,res)=>{
+  var x=req.files
+ 
+  console.log(x)
+  console.log(req.files.logo[0].path)
+  // const data = await fs.readFile(x.path);
+  // res.contentType(x.mimetype);
+  // res.send(data)
+  res.send("uploaded")
 })
-
-
-
 
 // ---------------------------------------------dont  modify it----------------------------------------------------
 app.get("/api/RegisterUser", async function (req, res) {
@@ -57,7 +71,6 @@ app.get("/api/RegisterUser", async function (req, res) {
   }
 
 })
-
 app.get("/api/ca", async function (req, res) {
   await helper.isUserRegistered("a12", "Org1")
   res.send(200)
