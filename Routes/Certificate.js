@@ -19,13 +19,13 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", 
         instructor_name: req.body.instructor_name,
         logo: req.files[0].buffer.toString('base64'),
         signature: req.files[1].buffer.toString('base64'),
-        certificate_img: req.body.certificate_img,
         issuedby: {
             issuer_name: u1.name,
             issuer_email: u1.email,
             org_name: u1.organization.name,
             org_id: u1.organization.id,
-        }
+        },
+        template_id:req.body.template_id
 
     })
 

@@ -20,7 +20,7 @@ const User = mongoose.Schema({
     },
     roles:[],
     status:{
-       active:Boolean
+       active:{type:Boolean,default:true},
         
     }
 

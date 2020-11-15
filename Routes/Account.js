@@ -64,7 +64,7 @@ router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdm
    try {
 
       var r1 = await user.findOneAndUpdate(querry, {
-         status: { active: false }
+         status: { active: flag }
       })
       if (r1)
          res.status(200).json({ active: flag })

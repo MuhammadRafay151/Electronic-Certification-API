@@ -36,10 +36,6 @@ const certificate = mongoose.Schema({
         type: String,
         required: true
     },
-    certificate_img: {
-        type: String,
-        required: true
-    },
     issuedby: {
         issuer_name: {
             type: String,
@@ -69,6 +65,9 @@ const certificate = mongoose.Schema({
     docType: {
         type: String,
         default: "certificate"
+    },
+    template_id: {
+        type: String, required: true
     }
 
 })
