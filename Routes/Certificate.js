@@ -6,8 +6,8 @@ const user = require('../models/user')
 var multer = require('multer')
 var upload = multer()
 var pagination = require('./../js/pagination');
-const { response } = require('express');
-router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), upload.any(), async (req, res) => {
+var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
+router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]),cpUpload, async (req, res) => {
 
     var u1 = await user.findById(req.user.uid)
     var c1 = new cert({
@@ -17,8 +17,8 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", 
         name: req.body.name,
         email: req.body.email,
         instructor_name: req.body.instructor_name,
-        logo: req.files[0].buffer.toString('base64'),
-        signature: req.files[1].buffer.toString('base64'),
+        logo:{image: req.files.logo[0].buffer.toString('base64'), mimetype:req.files.logo[0].mimetype},
+        signature: {image:req.files.signature[0].buffer.toString('base64'),mimetype:req.files.signature[0].mimetype},
         issuedby: {
             issuer_name: u1.name,
             issuer_email: u1.email,
@@ -79,7 +79,7 @@ router.get("/:id?", async (req, res) => {
         } else { result = { "list": result } }
         res.json(result)
     } else {
-        var result = await cert.find({ _id: req.params.id });
+        var result = await cert.findById(req.params.id );
         res.json(result)
     }
 })

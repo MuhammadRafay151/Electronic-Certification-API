@@ -53,7 +53,7 @@ app.post('/test',cpUpload,async (req,res)=>{
   var x=req.files
  
   console.log(x)
-  console.log(req.files.logo[0].path)
+  console.log(req.files.logo[0])
   // const data = await fs.readFile(x.path);
   // res.contentType(x.mimetype);
   // res.send(data)
