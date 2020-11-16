@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const organization = require('../models/organization');
+var pagination = require('./../js/pagination');
 
 const auth = require('../Auth/Auth')
 router.post('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
@@ -33,13 +34,33 @@ router.put('/active',auth.authenticateToken, auth.CheckAuthorization(["SuperAdmi
 
 })
 
-router.get('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
-    try {
-        var r1 = await organization.find()
-        res.json(r1)
-    }
-    catch (err) {
-        res.json(err)
+//router.get('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
+//router.get('/asd', async (req, res) => {
+
+ //   try {
+ //       var r1 = await organization.find()
+ //       res.json(r1)
+ //   }
+ //   catch (err) {
+  //      res.json(err)
+  //  }
+//})
+
+router.get("/:id?", async (req, res) => {
+
+    if (req.params.id == null) {
+        var perpage = 5
+        var pageno = req.query.pageno
+        if (isNaN(parseInt(pageno))) { pageno = 1 }
+        var result = await organization.find({}, { },{ skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+        if (pageno == 1) {
+            var total = await organization.find().countDocuments();
+            result = { "list": result, totalcount: total }
+        } else { result = { "list": result } }
+        res.json(result)
+    } else {
+        var result = await organization.find({ _id: req.params.id });
+        res.json(result)
     }
 })
 
