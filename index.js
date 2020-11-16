@@ -3,16 +3,18 @@ var cors = require('cors')
 const helper = require('./helper');
 const Invoke = require('./invoke');
 const certificate = require('./Routes/Certificate');
-const batch=require('./Routes/batch')
-const bcerts=require('./Routes/batch_certs')
-const organization=require('./Routes/Organization');
+const batch = require('./Routes/batch')
+const bcerts = require('./Routes/batch_certs')
+const organization = require('./Routes/Organization');
 const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
-const account=require("./Routes/Account");
+const account = require("./Routes/Account");
 const mongoose = require('mongoose');
-const count=require('./Routes/count')
+const count = require('./Routes/count')
+const download=require('./Routes/downloadpdf')
 const fs = require('fs').promises;
-var multer  = require('multer')
+var multer = require('multer');
+const { clearScreenDown } = require('readline');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -22,7 +24,6 @@ var storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix)
   }
 })
-
 var upload = multer({ storage: storage })
 /**
  * App Variables
@@ -37,21 +38,21 @@ require('dotenv').config();
 /**
  * Routes Definitions
  */
-app.use("/api/account",account)
-app.use("/api/certificate",certificate)
-app.use("/api/batch",batch)
-app.use("/api/bcert",bcerts)
-app.use("/api/count",count)
-app.use("/api/organization",organization)
-
+app.use("/api/account", account)
+app.use("/api/certificate", certificate)
+app.use("/api/batch", batch)
+app.use("/api/bcert", bcerts)
+app.use("/api/count", count)
+app.use("/api/organization", organization)
+app.use("/download",download)
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-mongoose.connect('mongodb://127.0.0.1:27017/ecert',{ useUnifiedTopology: true,useNewUrlParser: true },()=>{console.log("Connected to db")})
+mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-app.post('/test',cpUpload,async (req,res)=>{
-  var x=req.files
- 
+app.post('/test', cpUpload, async (req, res) => {
+  var x = req.files
+
   console.log(x)
   console.log(req.files.logo[0])
   // const data = await fs.readFile(x.path);
@@ -145,7 +146,7 @@ app.get('/api/VerifyCertificate/:id', async function (req, res) {
   if (result) {
     res.status(200).json(result);
   } else {
-    
+
     res.status(200).json("Certificate Not Found...");
   }
 })
