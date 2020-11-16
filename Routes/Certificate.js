@@ -7,7 +7,7 @@ var multer = require('multer')
 var upload = multer()
 var pagination = require('./../js/pagination');
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]),cpUpload, async (req, res) => {
+router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), cpUpload, async (req, res) => {
 
     var u1 = await user.findById(req.user.uid)
     var c1 = new cert({
@@ -17,15 +17,15 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", 
         name: req.body.name,
         email: req.body.email,
         instructor_name: req.body.instructor_name,
-        logo:{image: req.files.logo[0].buffer.toString('base64'), mimetype:req.files.logo[0].mimetype},
-        signature: {image:req.files.signature[0].buffer.toString('base64'),mimetype:req.files.signature[0].mimetype},
+        logo: { image: req.files.logo[0].buffer.toString('base64'), mimetype: req.files.logo[0].mimetype },
+        signature: { image: req.files.signature[0].buffer.toString('base64'), mimetype: req.files.signature[0].mimetype },
         issuedby: {
             issuer_name: u1.name,
             issuer_email: u1.email,
             org_name: u1.organization.name,
             org_id: u1.organization.id,
         },
-        template_id:req.body.template_id
+        template_id: req.body.template_id
 
     })
 
@@ -42,15 +42,13 @@ router.put("/:id", async (req, res) => {
 
 
     try {
-        var r1 = await cert.findByIdAndUpdate(req.params.id, {
+        var temp = {
             title: req.body.title,
             description: req.body.description,
             expiry_date: req.body.expiry_date,
             name: req.body.name,
             email: req.body.email,
             instructor_name: req.body.instructor_name,
-            logo: req.body.logo,
-            signature: req.body.signature,
             certificate_img: req.body.certificate_img,
             $push: {
                 "updatedby": {
@@ -59,7 +57,14 @@ router.put("/:id", async (req, res) => {
                 }
             }
 
-        })
+        }
+        if (req.body.logo) {
+            temp.logo = req.body.logo
+        }
+        if (req.body.signature) {
+            temp.signature = req.body.signature
+        }
+        var r1 = await cert.findByIdAndUpdate(req.params.id, temp)
         res.json(r1)
     }
     catch (err) {
@@ -79,7 +84,7 @@ router.get("/:id?", async (req, res) => {
         } else { result = { "list": result } }
         res.json(result)
     } else {
-        var result = await cert.findById(req.params.id );
+        var result = await cert.findById(req.params.id);
         res.json(result)
     }
 })

@@ -25,8 +25,7 @@ const certificate = mongoose.Schema({
         required: true
     },
     instructor_name: {
-        type: String,
-        required: true
+        type: String, required: false
     },
     logo: {
        image:{type:String,required:true},
