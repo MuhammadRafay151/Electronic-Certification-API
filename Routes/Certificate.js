@@ -38,31 +38,30 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", 
     }
 
 })
-router.put("/:id", async (req, res) => {
-
-
+router.put("/:id",auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), cpUpload, async (req, res) => {
     try {
-        var temp = {
+        var u1 = await user.findById(req.user.uid)
+        var temp={
             title: req.body.title,
             description: req.body.description,
             expiry_date: req.body.expiry_date,
             name: req.body.name,
             email: req.body.email,
             instructor_name: req.body.instructor_name,
-            certificate_img: req.body.certificate_img,
             $push: {
                 "updatedby": {
-                    name: req.body.updatedby.name,
-                    email: req.body.updatedby.email,
+                    name: u1.name,
+                    email: u1.email,
                 }
             }
 
         }
-        if (req.body.logo) {
-            temp.logo = req.body.logo
+        console.log(req.files)
+        if (req.files.logo) {
+            temp.logo = { image: req.files.logo[0].buffer.toString('base64'), mimetype: req.files.logo[0].mimetype }
         }
-        if (req.body.signature) {
-            temp.signature = req.body.signature
+        if (req.files.signature) {
+            temp.signature = { image: req.files.signature[0].buffer.toString('base64'), mimetype: req.files.signature[0].mimetype }
         }
         var r1 = await cert.findByIdAndUpdate(req.params.id, temp)
         res.json(r1)
