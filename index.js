@@ -12,6 +12,7 @@ const account = require("./Routes/Account");
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
 const download=require('./Routes/downloadpdf')
+const image=require('./Routes/Image')
 const fs = require('fs').promises;
 var multer = require('multer');
 const { clearScreenDown } = require('readline');
@@ -45,6 +46,7 @@ app.use("/api/bcert", bcerts)
 app.use("/api/count", count)
 app.use("/api/organization", organization)
 app.use("/download",download)
+app.use("/image",image)
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
