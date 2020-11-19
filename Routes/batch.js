@@ -15,8 +15,9 @@ var storage = multer.diskStorage({
     }
 })
 var upload = multer({ storage: storage })
+const Roles = require('../js/Roles')
 //create empty batches
-router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), async (req, res) => {
+router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
 
     if (req.params.id == null) {
         var perpage = 5
@@ -42,7 +43,7 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin
 
 })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), cpUpload, async (req, res) => {
+router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     var u1 = await user.findById(req.user.uid)
     var b1 = new batch({
         batch_name: req.body.batch_name,
@@ -51,7 +52,7 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", 
         expiry_date: req.body.expiry_date,
         instructor_name: req.body.instructor_name,
         logo: { image: req.files.logo[0].filename, mimetype: req.files.logo[0].mimetype },
-        signature: { image: req.files.signature[0].filename, mimetype: req.files.logo[0].mimetype },
+        signature: { image: req.files.signature[0].filename, mimetype: req.files.signature[0].mimetype },
         template_id: req.body.template_id,
         createdby: {
             name: u1.name,
@@ -70,24 +71,29 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", 
     }
 
 })
-router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), async (req, res) => {
+router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
     try {
-        var r1 = await batch.findByIdAndUpdate(req.params.id, {
+        var data = {
             title: req.body.title,
             description: req.body.description,
             expiry_date: req.body.expiry_date,
             instructor_name: req.body.instructor_name,
-            logo: req.body.logo,
-            signature: req.body.signature,
             $push: {
                 "updatedby": {
-                    name: req.body.updatedby.name,
-                    email: req.body.updatedby.email,
+                    name: req.user.name,
+                    email: req.user.email,
                 }
             }
 
-        }, { new: true })
+        }
+        if (req.files.logo) {
+            data.logo = { image: req.files.logo[0].filename, mimetype: req.files.logo[0].mimetype }
+        }
+        if (req.files.signature) {
+            data.signature = { image: req.files.signature[0].filename, mimetype: req.files.signature[0].mimetype }
+        }
+        var r1 = await batch.findOneAndUpdate({ _id: req.params.id, "createdby.org_id": req.user.org_id }, data, { new: true })
         res.json(r1)
     }
     catch (err) {
@@ -95,10 +101,14 @@ router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin"
     }
 
 })
-router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "Admin", "Issuer"]), async (req, res) => {
+router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
 
-    var result = await batch.findByIdAndDelete(req.params.id)
-    res.status(200).send(result)
+    try {
+        var result = await batch.findOneAndDelete({ _id: req.params.id, "createdby.org_id": req.user.org_id })
+        res.status(200).send(result)
+    } catch (err) {
+        res.send(err)
+    }
 
 })
 

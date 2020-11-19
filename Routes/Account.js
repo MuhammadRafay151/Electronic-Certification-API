@@ -3,6 +3,7 @@ var router = express.Router()
 const user = require('../models/user');
 const Auth = require('../Auth/Auth')
 var mongoose = require('mongoose');
+const Roles = require('../js/Roles')
 router.post('/signup', async function (req, res) {
 
    var s1 = new user();
@@ -31,7 +32,7 @@ router.post('/login', async function (req, res) {
          res.status(401).json({ message: "Invalid username or password" })
       } 
       else if(response.status.active==true){
-         var token = await Auth.generateAccessToken({ uid: response._id,name:response.name, org_id: response.organization.id, roles: response.roles })
+         var token = await Auth.generateAccessToken({ uid: response._id,email:response.email,name:response.name, org_id: response.organization.id, roles: response.roles })
          delete response._doc.password
          response._doc.token = token
          res.json(response)
@@ -44,7 +45,7 @@ router.post('/login', async function (req, res) {
 
 });
 
-router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization(["SuperAdmin", "admin"]), async function (req, res) {
+router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin,Roles.Admin]), async function (req, res) {
    var flag = req.query.flag == 1
    var querry = null
    if (req.user.roles.includes("SuperAdmin")) {

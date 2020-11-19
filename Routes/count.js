@@ -16,6 +16,7 @@ router.put('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]),
         }
     })
     try {
+        //needs to be wrap in transaction 
         var r1 = await organization.findByIdAndUpdate(req.body.Org_Id, {
             $inc: { ecertcount: parseInt(req.body.count) },
 

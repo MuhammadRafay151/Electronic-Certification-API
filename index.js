@@ -15,7 +15,6 @@ const download=require('./Routes/downloadpdf')
 const image=require('./Routes/Image')
 const fs = require('fs').promises;
 var multer = require('multer');
-const { clearScreenDown } = require('readline');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
