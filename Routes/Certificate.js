@@ -27,8 +27,8 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
             org_name: u1.organization.name,
             org_id: u1.organization.id,
         },
-        template_id: req.body.template_id
-
+        template_id: req.body.template_id,
+        issue_date:Date.now()
     })
 
     try {
@@ -79,7 +79,7 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await cert.find({ 'issuedby.org_id': req.user.org_id }, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
         if (pageno == 1) {
-            var total = await cert.find().countDocuments();
+            var total = await cert.find({ 'issuedby.org_id': req.user.org_id }).countDocuments();
             result = { "list": result, totalcount: total }
         } else { result = { "list": result } }
         res.json(result)

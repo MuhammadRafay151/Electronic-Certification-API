@@ -25,7 +25,7 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await batch.find({ "createdby.org_id": req.user.org_id }).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
         if (pageno == 1) {
-            var total = await batch.find().countDocuments();
+            var total = await batch.find({ "createdby.org_id": req.user.org_id }).countDocuments();
             result = { "list": result, totalcount: total }
         } else { result = { "list": result } }
         res.json(result)
@@ -54,6 +54,7 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdm
         logo: { image: req.files.logo[0].filename, mimetype: req.files.logo[0].mimetype },
         signature: { image: req.files.signature[0].filename, mimetype: req.files.signature[0].mimetype },
         template_id: req.body.template_id,
+        created_date:Date.now(),
         createdby: {
             name: u1.name,
             email: u1.email,
