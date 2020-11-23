@@ -28,12 +28,12 @@ const certificate = mongoose.Schema({
         type: String, required: false
     },
     logo: {
-       image:{type:String,required:true},
-       mimetype:{type:String,required:true}
+        image: { type: String, required: true },
+        mimetype: { type: String, required: true }
     },
     signature: {
-        image:{type:String,required:true},
-        mimetype:{type:String,required:true}
+        image: { type: String, required: true },
+        mimetype: { type: String, required: true }
     },
     issuedby: {
         issuer_name: {
@@ -52,6 +52,12 @@ const certificate = mongoose.Schema({
             required: true
         },
 
+    },
+    publish: {
+        status: { type: Boolean, default: false },
+        publisher_name: { type: String },
+        publisher_email: { type: String },
+        publish_date: { type: Date }
     },
     updatedby: [
         {

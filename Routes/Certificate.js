@@ -28,7 +28,7 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
             org_id: u1.organization.id,
         },
         template_id: req.body.template_id,
-        issue_date:Date.now()
+        issue_date: Date.now()
     })
 
     try {
@@ -64,7 +64,7 @@ router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
         if (req.files.signature) {
             temp.signature = { image: req.files.signature[0].buffer.toString('base64'), mimetype: req.files.signature[0].mimetype }
         }
-        var r1 = await cert.findByIdAndUpdate(req.params.id, temp)
+        var r1 = await cert.findOneAndUpdate({ _id: req.params.id, 'issuedby.org_id': req.user.org_id,'publish.status': false }, temp)
         res.json(r1)
     }
     catch (err) {
@@ -76,27 +76,32 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
     if (req.params.id == null) {
         var perpage = 5
         var pageno = req.query.pageno
+        var query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
         if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await cert.find({ 'issuedby.org_id': req.user.org_id }, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+        var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
         if (pageno == 1) {
-            var total = await cert.find({ 'issuedby.org_id': req.user.org_id }).countDocuments();
+            var total = await cert.find(query).countDocuments();
             result = { "list": result, totalcount: total }
         } else { result = { "list": result } }
         res.json(result)
     } else {
         var result = null;
+        var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }
         if (req.query.edit) {
-            result = await cert.findOne({ _id: req.params.id, 'issuedby.org_id': req.user.org_id }, { _id: 0, issue_date: 0 });
+            result = await cert.findOne(query, { _id: 0, issue_date: 0 });
         } else {
-            result = await cert.findOne({ _id: req.params.id, 'issuedby.org_id': req.user.org_id });
+            result = await cert.findOne(query);
         }
-        res.json(result)
+        if (result)
+            res.json(result)
+        else
+            res.status(404).send()
     }
 })
 router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
 
-        var c = await cert.findOneAndDelete({ _id: req.params.id, 'issuedby.org_id': req.user.org_id })
+        var c = await cert.findOneAndDelete({ _id: req.params.id, 'issuedby.org_id': req.user.org_id,'publish.status': false })
         console.log(req.user.name + "deleted")
         res.status(200).json({ message: "Deleted Sucessfully" })
     }

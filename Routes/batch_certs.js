@@ -3,15 +3,20 @@ const router = express.Router()
 const Auth = require('../Auth/Auth')
 const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
-const user = require('../models/user')
-var mongoose = require('mongoose');
 const Roles = require('../js/Roles')
-const pagination = require('../js/pagination')
+const pagination = require('../js/pagination');
+const { compile } = require('ejs');
 //api handle requests to manipulate certificates in batches.
-router.get("/:batch_id/:cert_id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
-        var temp = await batch.exists({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id });
-        if (req.params.cert_id == null && temp) {
+        var query = null
+        if (req.query.pub) {
+            query = { _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': true }
+        } else {
+            query = { _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
+        }
+        var temp = await batch.exists(query);
+        if (temp) {
             var perpage = 5
             var pageno = req.query.pageno
             if (isNaN(parseInt(pageno))) { pageno = 1 }
@@ -20,10 +25,6 @@ router.get("/:batch_id/:cert_id?", Auth.authenticateToken, Auth.CheckAuthorizati
                 var total = await batch_cert.find({ batch_id: req.params.batch_id }).countDocuments();
                 result = { "list": result, totalcount: total }
             } else { result = { "list": result } }
-            res.json(result)
-        }
-        else if (temp) {
-            var result = await batch_cert.find({ _id: req.params.cert_id, batch_id: req.params.batch_id });
             res.json(result)
         }
         else {
