@@ -5,8 +5,9 @@ const user = require('../models/user');
 const count = require('../models/count')
 var pagination = require('./../js/pagination');
 const auth = require('../Auth/Auth')
+const Roles = require('../js/Roles')
 
-router.put('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
+router.put('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     console.log(req.body)
     var c1 = new count({
         IsIncrease: true,
@@ -33,19 +34,21 @@ router.put('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]),
 
 })
 
-router.get("/:id?", async (req, res) => {
-
+router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    
     if (req.params.id == null) {
+       
         var perpage = 5
         var pageno = req.query.pageno
         if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await count.find({}, { },{ skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+        var result = await count.find(req.user.org_id, { },{ skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
         if (pageno == 1) {
-            var total = await count.find().countDocuments();
+            var total = await count.find(req.user.org_id).countDocuments();
             result = { "list": result, totalcount: total }
         } else { result = { "list": result } }
         res.json(result)
     } else {
+        
         var result = await count.find({ _id: req.params.id });
         res.json(result)
     }
