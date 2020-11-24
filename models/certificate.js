@@ -10,7 +10,6 @@ const certificate = mongoose.Schema({
     },
     expiry_date: {
         type: Date,
-        required: false
     },
     issue_date: {
         type: Date,

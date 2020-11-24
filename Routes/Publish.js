@@ -43,50 +43,5 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
         res.status(500).send()
     }
 })
-router.get("/single/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
 
-    if (req.params.id == null) {
-        var perpage = 5
-        var pageno = req.query.pageno
-        var query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-        if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
-        if (pageno == 1) {
-            var total = await cert.find(query).countDocuments();
-            result = { "list": result, totalcount: total }
-        } else { result = { "list": result } }
-        res.json(result)
-    } else {
-        var result = null;
-        var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-        result = await cert.findOne(query);
-        if (result)
-            res.json(result)
-        else
-            res.status(404).send()
-    }
-})
-router.get("/batch/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
-
-    if (req.params.id == null) {
-        var perpage = 5
-        var pageno = req.query.pageno
-        var query = { 'createdby.org_id': req.user.org_id, 'publish.status': true }
-        if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await batch.find(query, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
-        if (pageno == 1) {
-            var total = await batch.find(query).countDocuments();
-            result = { "list": result, totalcount: total }
-        } else { result = { "list": result } }
-        res.json(result)
-    } else {
-        var result = null;
-        var query = { _id: req.params.id, 'createdby.org_id': req.user.org_id, 'publish.status': true }
-        result = await batch.findOne(query);
-        if (result)
-            res.json(result)
-        else
-            res.status(404).send()
-    }
-})
 module.exports = router

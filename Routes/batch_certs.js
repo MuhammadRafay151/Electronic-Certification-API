@@ -15,16 +15,14 @@ router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.
         } else {
             query = { _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
         }
-        var temp = await batch.exists(query);
+        var temp = await batch.findOne(query);
         if (temp) {
             var perpage = 5
             var pageno = req.query.pageno
             if (isNaN(parseInt(pageno))) { pageno = 1 }
             var result = await batch_cert.find({ batch_id: req.params.batch_id }).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
-            if (pageno == 1) {
-                var total = await batch_cert.find({ batch_id: req.params.batch_id }).countDocuments();
-                result = { "list": result, totalcount: total }
-            } else { result = { "list": result } }
+            var total = await batch_cert.find({ batch_id: req.params.batch_id }).countDocuments();
+            result = { "list": result,batch:temp, totalcount: total }
             res.json(result)
         }
         else {

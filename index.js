@@ -16,6 +16,7 @@ const image=require('./Routes/Image')
 const publish=require('./Routes/Publish')
 const fs = require('fs').promises;
 var multer = require('multer');
+const { type } = require('os');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -54,14 +55,16 @@ mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 app.post('/test', cpUpload, async (req, res) => {
-  var x = req.files
+  // var x = req.files
 
-  console.log(x)
-  console.log(req.files.logo[0])
+  // console.log(x)
+  // console.log(req.files.logo[0])
   // const data = await fs.readFile(x.path);
   // res.contentType(x.mimetype);
   // res.send(data)
-  res.send("uploaded")
+  var x=req.body.name
+  console.log(typeof(1))
+  res.json({x:x})
 })
 
 // ---------------------------------------------dont  modify it----------------------------------------------------

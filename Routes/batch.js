@@ -22,23 +22,25 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
     if (req.params.id == null) {
         var perpage = 5
         var pageno = req.query.pageno
-        var query={ "createdby.org_id": req.user.org_id ,'publish.status': false }
+        var query = null
+        if (req.query.pub) {
+            query = { "createdby.org_id": req.user.org_id, 'publish.status': true }
+        } else {
+            query = { "createdby.org_id": req.user.org_id, 'publish.status': false }
+        }
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await batch.find(query).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
-        if (pageno == 1) {
-            var total = await batch.find(query).countDocuments();
-            result = { "list": result, totalcount: total }
-        } else { result = { "list": result } }
+        var total = await batch.find(query).countDocuments();
+        result = { "list": result, totalcount: total }
         res.json(result)
     } else {
         var result = null
-        var query={ _id: req.params.id, 'createdby.org_id': req.user.org_id,'publish.status': false}
+        var query = { _id: req.params.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
         if (req.query.edit) {
             result = await batch.findOne(query, { _id: 0, created_date: 0 });
         } else {
             result = await batch.findOne(query);
         }
-
         res.json(result)
     }
 
@@ -47,16 +49,15 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     var u1 = await user.findById(req.user.uid)
-    var b1 = new batch({
+    var obj={
         batch_name: req.body.batch_name,
         title: req.body.title,
         description: req.body.description,
-        expiry_date: req.body.expiry_date,
         instructor_name: req.body.instructor_name,
         logo: { image: req.files.logo[0].filename, mimetype: req.files.logo[0].mimetype },
         signature: { image: req.files.signature[0].filename, mimetype: req.files.signature[0].mimetype },
         template_id: req.body.template_id,
-        created_date:Date.now(),
+        created_date: Date.now(),
         createdby: {
             name: u1.name,
             email: u1.email,
@@ -64,8 +65,12 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdm
             org_id: u1.organization.id,
         }
 
-    })
+    }
+    if (req.body.expiry_date) {
+        obj.expiry_date = req.body.expiry_date
+    }
     try {
+        var b1 = new batch(obj)
         var r1 = await b1.save()
         res.json(r1)
     }
@@ -96,7 +101,7 @@ router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperA
         if (req.files.signature) {
             data.signature = { image: req.files.signature[0].filename, mimetype: req.files.signature[0].mimetype }
         }
-        var r1 = await batch.findOneAndUpdate({ _id: req.params.id, "createdby.org_id": req.user.org_id,'publish.status': false }, data, { new: true })
+        var r1 = await batch.findOneAndUpdate({ _id: req.params.id, "createdby.org_id": req.user.org_id, 'publish.status': false }, data, { new: true })
         res.json(r1)
     }
     catch (err) {
@@ -107,7 +112,7 @@ router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperA
 router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
 
     try {
-        var result = await batch.findOneAndDelete({ _id: req.params.id, "createdby.org_id": req.user.org_id,'publish.status': false })
+        var result = await batch.findOneAndDelete({ _id: req.params.id, "createdby.org_id": req.user.org_id, 'publish.status': false })
         res.status(200).send(result)
     } catch (err) {
         res.send(err)
