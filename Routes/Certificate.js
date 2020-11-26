@@ -92,12 +92,13 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
         res.json(result)
     } else {
         var result = null;
-        var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }
         if (req.query.edit) {
             //for edit view
+            var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }
             result = await cert.findOne(query, { _id: 0, issue_date: 0 });
         } else {
             //for certificate view
+            var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id}
             result = await cert.findOne(query);
         }
         if (result)

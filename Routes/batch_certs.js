@@ -22,7 +22,7 @@ router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.
             if (isNaN(parseInt(pageno))) { pageno = 1 }
             var result = await batch_cert.find({ batch_id: req.params.batch_id }).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
             var total = await batch_cert.find({ batch_id: req.params.batch_id }).countDocuments();
-            result = { "list": result,batch:temp, totalcount: total }
+            result = { "list": result, batch: temp, totalcount: total }
             res.json(result)
         }
         else {
@@ -89,7 +89,7 @@ router.delete("/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization(
 })
 router.get("/view/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     var b1 = await batch.findOne({ _id: req.params.batch_id })
-    var bcert = await batch_cert.findById(req.params.id)
+    var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
     if (b1 && bcert) {
         delete b1._doc.created_date
         b1._doc.issue_date = bcert.issue_date

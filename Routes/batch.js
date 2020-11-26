@@ -35,10 +35,12 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
         res.json(result)
     } else {
         var result = null
-        var query = { _id: req.params.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
         if (req.query.edit) {
+            var query = { _id: req.params.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
+
             result = await batch.findOne(query, { _id: 0, created_date: 0 });
         } else {
+            var query = { _id: req.params.id, 'createdby.org_id': req.user.org_id }
             result = await batch.findOne(query);
         }
         res.json(result)
@@ -49,7 +51,7 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     var u1 = await user.findById(req.user.uid)
-    var obj={
+    var obj = {
         batch_name: req.body.batch_name,
         title: req.body.title,
         description: req.body.description,
