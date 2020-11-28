@@ -118,5 +118,4 @@ router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
         res.send(err)
     }
 })
-
 module.exports = router

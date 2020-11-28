@@ -6,6 +6,7 @@ const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
 var ejs = require('ejs');
 var cert_pdf = require('../js/CertificatePdf')
+const Image=require('../js/Image')
 router.get('/:id/:batch_id?', async (req, res) => {
     try {
         // var htmlContent = await fs.readFile('Templates\\c1.ejs', 'utf8');
@@ -24,12 +25,15 @@ router.get('/:id/:batch_id?', async (req, res) => {
             //batch certficate download
             var b1 = await batch.findOne({ _id: req.params.batch_id,'publish.status': true  })
             var bcert = await batch_cert.findById({ _id: req.params.id, batch_id: req.params.batch_id })
+            var path="./uploads/"
             if (b1 && bcert) {
                 delete b1._doc.created_date
                 b1._doc.issue_date = bcert.issue_date
                 b1._doc._id = bcert._id
                 b1._doc.name = bcert.name
                 b1._doc.email = bcert.email
+                b1._doc.logo.image=await Image.GetImgBase64(path+b1.logo.image)
+                b1._doc.signature.image= await Image.GetImgBase64(path+b1.signature.image)
                 var buffer = await cert_pdf.GetPdf_Buffer(b1)
                 res.contentType("application/pdf");
                 return res.send(buffer)
