@@ -7,7 +7,7 @@ const Organization = mongoose.Schema({
     },
     register_date: {
         type: Date,
-        default: Date.now()
+        required: true
     },
     email: {
         type: String,

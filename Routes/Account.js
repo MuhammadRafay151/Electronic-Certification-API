@@ -78,4 +78,15 @@ router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
 
 });
 
+// var usr = new user({
+//    name: req.body.user.name,
+//    email: req.body.user.email,
+//    password: req.body.user.password,
+//    organization: {
+//        name: req.body.org.name,
+//        id: req.body.org.id
+//    },
+//    roles: [Roles.Admin],
+//    status: { active: true }
+// })
 module.exports = router
