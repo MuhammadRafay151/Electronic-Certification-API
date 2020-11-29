@@ -11,6 +11,7 @@ const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account = require("./Routes/Account");
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
+const mail = require('./Routes/mail')
 const download = require('./Routes/downloadpdf')
 const image = require('./Routes/Image')
 const publish = require('./Routes/Publish')
@@ -44,6 +45,7 @@ app.use("/api/account", account)
 app.use("/api/certificate", certificate)
 app.use("/api/batch", batch)
 app.use("/api/bcert", bcerts)
+app.use("/api/mail", mail)
 app.use("/api/count", count)
 app.use("/api/organization", organization)
 app.use("/download", download)
