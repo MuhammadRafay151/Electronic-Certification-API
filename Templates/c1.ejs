@@ -12,7 +12,7 @@
     It is to certify that <b> <%= data.name%></b> <%= data.description %>
   </p>
   <p class="p2 ">
-    <%=   data.issue_date %>
+   Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
   
   </p>
   <p class="p3 ">

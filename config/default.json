@@ -1,5 +1,7 @@
 {
-    "App": {
-        "org": "Org1"
+    "Org": {
+        "name": "Org1",
+        "mspId": "Org1MSP",
+        "ca":"ca.org1.example.com"
     }
 }

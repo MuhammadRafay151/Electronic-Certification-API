@@ -61,6 +61,12 @@ const batch = mongoose.Schema({
             email: String
         }
     ],
+    publish: {
+        status: { type: Boolean, default: false },
+        publisher_name: { type: String },
+        publisher_email: { type: String },
+        publish_date: { type: Date }
+    }
 })
 
 module.exports = mongoose.model("batch", batch)

@@ -1,20 +1,22 @@
 const express = require('express');
 var cors = require('cors')
-const helper = require('./helper');
-const Invoke = require('./invoke');
+const helper = require('./BlockChain/helper');
+const Invoke = require('./BlockChain/invoke');
 const certificate = require('./Routes/Certificate');
 const batch = require('./Routes/batch')
 const bcerts = require('./Routes/batch_certs')
 const organization = require('./Routes/Organization');
-const query = require('./query');
+// const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account = require("./Routes/Account");
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
-const download=require('./Routes/downloadpdf')
-const image=require('./Routes/Image')
+const download = require('./Routes/downloadpdf')
+const image = require('./Routes/Image')
+const publish = require('./Routes/Publish')
 const fs = require('fs').promises;
 var multer = require('multer');
+const { type } = require('os');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -44,22 +46,25 @@ app.use("/api/batch", batch)
 app.use("/api/bcert", bcerts)
 app.use("/api/count", count)
 app.use("/api/organization", organization)
-app.use("/download",download)
-app.use("/image",image)
+app.use("/download", download)
+app.use("/api/publish", publish)
+app.use("/image", image)
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 app.post('/test', cpUpload, async (req, res) => {
-  var x = req.files
+  // var x = req.files
 
-  console.log(x)
-  console.log(req.files.logo[0])
+  // console.log(x)
+  // console.log(req.files.logo[0])
   // const data = await fs.readFile(x.path);
   // res.contentType(x.mimetype);
   // res.send(data)
-  res.send("uploaded")
+  var x = req.body.name
+  console.log(typeof (1))
+  res.json({ x: x })
 })
 
 // ---------------------------------------------dont  modify it----------------------------------------------------
@@ -91,7 +96,7 @@ app.get('/users', async function (req, res) {
   }
 
 
-  let response = await helper.getRegisteredUser(username, orgName, true);
+  let response = await helper.getRegisteredUser(username);
 
 
   if (response && typeof response !== 'string') {
@@ -124,15 +129,17 @@ app.post('/api/IssueCertificate', async function (req, res) {
   // c1.organizations = userorg;
   // c1.title = "Nodejs";
   // c1.key = "cert25";
-  var c1 = new certificate();
-  c1.name = req.body.name;
-  c1.email = req.body.email;
-  c1.description = req.body.description;
-  c1.organizations = userorg;
-  c1.title = req.body.title;
-  c1.key = req.body.key;
+
+  var c1 = {
+    name: req.body.name,
+    email: req.body.email,
+    description: req.body.description,
+    organizations: userorg,
+    title: req.body.title,
+    id: req.body.id
+  }
   try {
-    var response = await Invoke.IssueCertificate(c1, "as4", userorg);
+  var response = await Invoke.IssueCertificate(c1, "a1");
     c1.message = "Transaction Successful..."
     res.status(200).json(c1);
   } catch (err) {
