@@ -5,22 +5,23 @@ const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
 const Roles = require('../js/Roles')
 const pagination = require('../js/pagination');
-const { compile } = require('ejs');
 //api handle requests to manipulate certificates in batches.
 router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var query = null
         if (req.query.pub) {
             query = { _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': true }
+            sort={name:1}
         } else {
             query = { _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': false }
+            sort={issue_date:-1}
         }
         var temp = await batch.findOne(query);
         if (temp) {
             var perpage = 5
             var pageno = req.query.pageno
             if (isNaN(parseInt(pageno))) { pageno = 1 }
-            var result = await batch_cert.find({ batch_id: req.params.batch_id }).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
+            var result = await batch_cert.find({ batch_id: req.params.batch_id }).sort(sort).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
             var total = await batch_cert.find({ batch_id: req.params.batch_id }).countDocuments();
             result = { "list": result, batch: temp, totalcount: total }
             res.json(result)

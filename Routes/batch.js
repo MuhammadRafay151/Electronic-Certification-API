@@ -18,18 +18,20 @@ var upload = multer({ storage: storage })
 const Roles = require('../js/Roles')
 //create empty batches
 router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
-
     if (req.params.id == null) {
         var perpage = 5
         var pageno = req.query.pageno
         var query = null
+        var sort=null
         if (req.query.pub) {
             query = { "createdby.org_id": req.user.org_id, 'publish.status': true }
+            sort={"publish.publish_date":-1}
         } else {
             query = { "createdby.org_id": req.user.org_id, 'publish.status': false }
+            sort={created_date:-1}
         }
         if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await batch.find(query).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
+        var result = await batch.find(query).sort(sort).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
         var total = await batch.find(query).countDocuments();
         result = { "list": result, totalcount: total }
         res.json(result)
@@ -45,8 +47,6 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
         }
         res.json(result)
     }
-
-
 })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {

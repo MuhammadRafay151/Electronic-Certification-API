@@ -80,13 +80,16 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
         var perpage = 5
         var pageno = req.query.pageno
         var query = null
+        var sort=null
         if (req.query.pub) {
             query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
+            sort={"publish.publish_date":-1}
         } else {
             query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
+            sort={issue_date:-1}
         }
         if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+        var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }).sort(sort).skip(pagination.Skip(pageno, perpage)).limit(perpage);
         var total = await cert.find(query).countDocuments();
         result = { "list": result, totalcount: total }
         res.json(result)
