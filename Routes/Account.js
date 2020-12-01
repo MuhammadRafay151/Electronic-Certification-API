@@ -13,6 +13,7 @@ router.post('/signup', async function (req, res) {
    s1.roles = req.body.roles
    s1.organization.name = req.body.organization.name
    s1.organization.id = req.body.organization.id
+   s1.register_date = Date.now()
    try {
       var response = await s1.save()
       res.json({ message: response })
@@ -30,13 +31,13 @@ router.post('/login', async function (req, res) {
       var response = await user.findOne({ email: req.body.email, password: req.body.password })
       if (response == null) {
          res.status(401).json({ message: "Invalid username or password" })
-      } 
-      else if(response.status.active==true){
-         var token = await Auth.generateAccessToken({ uid: response._id,email:response.email,name:response.name, org_id: response.organization.id, roles: response.roles })
+      }
+      else if (response.status.active == true) {
+         var token = await Auth.generateAccessToken({ uid: response._id, email: response.email, name: response.name, org_id: response.organization.id, roles: response.roles })
          delete response._doc.password
          response._doc.token = token
          res.json(response)
-      }else{
+      } else {
          res.status(403).json({ message: "Account has been disabled" })
       }
    } catch (err) {
@@ -45,7 +46,7 @@ router.post('/login', async function (req, res) {
 
 });
 
-router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin,Roles.Admin]), async function (req, res) {
+router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res) {
    var flag = req.query.flag == 1
    var querry = null
    if (req.user.roles.includes("SuperAdmin")) {

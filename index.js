@@ -9,6 +9,7 @@ const organization = require('./Routes/Organization');
 // const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account = require("./Routes/Account");
+const users=require("./Routes/Users")
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
 const download = require('./Routes/downloadpdf')
@@ -41,6 +42,7 @@ require('dotenv').config();
  * Routes Definitions
  */
 app.use("/api/account", account)
+app.use("/api/users", users)
 app.use("/api/certificate", certificate)
 app.use("/api/batch", batch)
 app.use("/api/bcert", bcerts)

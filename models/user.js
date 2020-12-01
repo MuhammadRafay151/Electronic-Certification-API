@@ -22,9 +22,8 @@ const User = mongoose.Schema({
     status:{
        active:{type:Boolean,default:true},
         
-    }
-
-
+    },
+    register_date:{type:Date},
 })
 
 module.exports = mongoose.model("User", User)

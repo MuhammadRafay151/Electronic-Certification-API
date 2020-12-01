@@ -19,32 +19,41 @@ router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
         res.json(err)
     }
 })
-
-router.put('/active', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    var flag = req.query.flag == 1
+router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
-        var r1 = await organization.findByIdAndUpdate(req.body.id, { status: { active: flag } }, { new: true })
-        res.json(r1)
+        var r1 = await organization.findOne({ id: req.body.id })
+        if (r1) {
+            var r2 = await organization.findOneAndUpdate({ id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
+            res.status(200).send("Status changed successfully")
+        } else {
+            res.status(400).send()
+        }
     }
     catch (err) {
-        res.json(err)
+        res.status(500).send()
     }
 
 })
-
 router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
 
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }
-    var result = await organization.find({id: { $nin: [req.user.org_id] }}, {}, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
+    var result = await organization.find({ id: { $nin: [req.user.org_id] } }, {}, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
     var total = await organization.find().countDocuments();
     result = { "list": result, totalcount: total }
     res.json(result)
 })
 router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-
-    var result = await organization.find({ _id: req.params.id });
-    res.json(result)
+    try {
+        var result = await organization.findOne({ id: req.params.id });
+        if (result) {
+            res.json(result)
+        } else {
+            res.status(404).send()
+        }
+    } catch (err) {
+        res.status(500).send()
+    }
 })
 module.exports = router
