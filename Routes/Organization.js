@@ -44,6 +44,18 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     result = { "list": result, totalcount: total }
     res.json(result)
 })
+router.get("/details", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin,Roles.Admin]), async (req, res) => {
+    try {
+        var result = await organization.findOne({ id: req.user.org_id });
+        if (result) {
+            res.json(result)
+        } else {
+            res.status(404).send()
+        }
+    } catch (err) {
+        res.status(500).send()
+    }
+})
 router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         var result = await organization.findOne({ id: req.params.id });
@@ -56,4 +68,8 @@ router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
         res.status(500).send()
     }
 })
+
+
+
+
 module.exports = router

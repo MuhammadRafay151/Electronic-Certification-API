@@ -4,25 +4,65 @@ const user = require('../models/user');
 const Auth = require('../Auth/Auth')
 var mongoose = require('mongoose');
 const Roles = require('../js/Roles')
-router.post('/signup', async function (req, res) {
-
-   var s1 = new user();
-   s1.name = req.body.name
-   s1.email = req.body.email
-   s1.password = req.body.password
-   s1.roles = req.body.roles
-   s1.organization.name = req.body.organization.name
-   s1.organization.id = req.body.organization.id
-   s1.register_date = Date.now()
+const organization = require('../models/organization')
+router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
-      var response = await s1.save()
-      res.json({ message: response })
+      var org = await organization.findOne({ id: req.params.orgid })
+      var roles = []
+      if (org) {
+         var Admin = await user.exists({ 'organization.id': org.id, roles: Roles.Admin })
+         if (Admin) {
+            roles = [Roles.Issuer]
+         } else {
+            roles = [Roles.Admin, Roles.Issuer]
+         }
+         var s1 = new user({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            organization: {
+               name: org.name,
+               id: org.id
+            },
+            roles: roles,
+            register_date: Date.now()
+         });
+         var response = await s1.save()
+         res.json({ message: response })
+      } else {
+         res.status(404).send()
+      }
    }
    catch (err) {
-      if (err.code == 11000) { err = { message: "email already registered" } }
-      res.json({ message: err })
+      // if (err.code == 11000) { err = { message: "email already registered" } }
+      // res.json({ message: err })
+      res.status(500).send()
    }
-
+});
+router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
+   try {
+      var org = await organization.findOne({ id: req.user.org_id })
+      if (org) {
+         var s1 = new user({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            organization: {
+               name: org.name,
+               id: org.id
+            },
+            roles: [Roles.Issuer],
+            register_date: Date.now()
+         });
+         var response = await s1.save()
+         res.json({ message: response })
+      } else {
+         res.status(404).send()
+      }
+   }
+   catch (err) {
+      res.status(500).send()
+   }
 });
 
 router.post('/login', async function (req, res) {
@@ -46,48 +86,49 @@ router.post('/login', async function (req, res) {
 
 });
 
-router.put('/active', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res) {
-   var flag = req.query.flag == 1
-   var querry = null
-   if (req.user.roles.includes("SuperAdmin")) {
-      querry = {
-         _id: mongoose.Types.ObjectId(req.body.id),
-
-      }
-   } else {
-      querry = {
-         _id: mongoose.Types.ObjectId(req.body.id),
-         "organization.id": req.user.org_id
-
-      }
-
-
-   }
+router.put('/togglestatus/:orgid/:userid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res) {
    try {
-
-      var r1 = await user.findOneAndUpdate(querry, {
-         status: { active: flag }
-      })
-      if (r1)
-         res.status(200).json({ active: flag })
+      if (req.user.uid == req.params.userid)
+         return res.status(400).send("Cannot process this request")
+      var r1 = await user.findOne({ _id: req.params.userid, 'organization.id': req.params.orgid })
+      if (r1) {
+         var r2 = await user.findOneAndUpdate({ _id: req.params.userid, 'organization.id': req.params.orgid }, { "$set": { status: { active: !r1.status.active } } })
+         res.status(200).send("Status changed successfully")
+      }
       else
-         res.status(404).send("user not found")
+         res.status(404).send()
    }
    catch (err) {
-      res.json(err)
+      res.status(500).send()
    }
 
 });
 
-// var usr = new user({
-//    name: req.body.user.name,
-//    email: req.body.user.email,
-//    password: req.body.user.password,
-//    organization: {
-//        name: req.body.org.name,
-//        id: req.body.org.id
-//    },
-//    roles: [Roles.Admin],
-//    status: { active: true }
-// })
+router.put('/togglestatus/:userid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res) {
+   try {
+      if (req.user.uid == req.params.userid)
+         return res.status(400).send("Cannot process this request")
+      var r1 = await user.findOne({ _id: req.params.userid, 'organization.id': req.user.org_id })
+      if (r1) {
+         var r2 = await user.findOneAndUpdate({ _id: req.params.userid, 'organization.id': req.user.org_id }, { "$set": { status: { active: !r1.status.active } } })
+         res.status(200).send("Status changed successfully")
+      }
+      else
+         res.status(404).send()
+   }
+   catch (err) {
+      res.status(500).send()
+   }
+
+});
+
+router.get('/Available/:email', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
+   try {
+      var r1 = await user.exists({ email: req.params.email })
+      res.json({ IsAvailable: !r1 })
+   } catch {
+      res.status(500).send()
+   }
+})
+
 module.exports = router
