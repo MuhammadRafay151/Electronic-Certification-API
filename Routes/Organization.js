@@ -4,6 +4,7 @@ const organization = require('../models/organization');
 var pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
 const auth = require('../Auth/Auth')
+const user = require('../models/user');
 router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     var org = new organization({
         name: req.body.name,
@@ -44,7 +45,7 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     result = { "list": result, totalcount: total }
     res.json(result)
 })
-router.get("/details", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin,Roles.Admin]), async (req, res) => {
+router.get("/details", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
     try {
         var result = await organization.findOne({ id: req.user.org_id });
         if (result) {
@@ -68,7 +69,24 @@ router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
         res.status(500).send()
     }
 })
-
+router.put("/UserLimit/:orgid", async (req, res) => {
+    try {
+        if (!req.body.count)
+            res.status(400).send()
+        var total = await user.find({ "organization.id": req.params.org_id }).countDocuments()
+        if (parseInt(req.body.count) < total)
+            res.status(400).send(`Error: Count should be greater then total enrolled users:${total}`)
+        var r2 = await organization.findOneAndUpdate({ id: req.params.orgid }, { user_limit: req.body.count })
+        if (r2) {
+            res.status(200).send("Limit Updated")
+        } else {
+            res.status(404).send()
+        }
+    }
+    catch (err) {
+        res.status(500).send()
+    }
+})
 
 
 

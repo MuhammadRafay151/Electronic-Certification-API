@@ -22,6 +22,10 @@ const Organization = mongoose.Schema({
         type: Number,
         default: 0
     },
+    user_limit: {
+        type: Number,
+        default: 0
+    },
 
     status: {
         active: {
