@@ -8,8 +8,12 @@ const organization = require('../models/organization')
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ id: req.params.orgid })
+      var TotalEnroll = await user.find({ "organization.id": req.params.orgid }).countDocuments()
       var roles = []
       if (org) {
+         if (org.user_limit == TotalEnroll) {
+            return res.status(400).send("User limit reached")
+         }
          var Admin = await user.exists({ 'organization.id': org.id, roles: Roles.Admin })
          if (Admin) {
             roles = [Roles.Issuer]
@@ -28,7 +32,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
             register_date: Date.now()
          });
          var response = await s1.save()
-         res.json({ message: response })
+         res.status(200).send("Registered Successfully")
       } else {
          res.status(404).send()
       }
