@@ -40,8 +40,8 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }
-    var result = await organization.find({ id: { $nin: [req.user.org_id] } }, {}, { skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
-    var total = await organization.find().countDocuments();
+    var result = await organization.find({ id: { $nin: [req.user.org_id] } }).sort({register_date:"-1"}).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
+    var total = await organization.find({ id: { $nin: [req.user.org_id] } }).countDocuments();
     result = { "list": result, totalcount: total }
     res.json(result)
 })
@@ -69,7 +69,7 @@ router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
         res.status(500).send()
     }
 })
-router.put("/UserLimit/:orgid", async (req, res) => {
+router.put("/UserLimit/:orgid",auth.authenticateToken,auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         if (!req.body.count)
             res.status(400).send()
@@ -87,7 +87,4 @@ router.put("/UserLimit/:orgid", async (req, res) => {
         res.status(500).send()
     }
 })
-
-
-
 module.exports = router

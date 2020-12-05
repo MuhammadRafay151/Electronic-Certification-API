@@ -19,7 +19,7 @@ router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
             var c1 = new count({
                 IsIncrease: true,
                 Count: req.body.count,
-                Org_Id: req.params.id,
+                Org_Id: req.params.orgid,
                 date: Date.now(),
                 by: {
                     name: req.user.name,
@@ -35,7 +35,7 @@ router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
 
     }
     catch (err) {
-        res.status(500).send()
+        res.status(500).send(err)
     }
 
 })
@@ -71,7 +71,6 @@ router.put('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     }
 
 })
-
 router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
     var perpage = 5
     var pageno = req.query.pageno
@@ -81,7 +80,6 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     result = { "list": result, totalcount: total }
     res.json(result)
 })
-
 router.get('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
 
     var perpage = 5
