@@ -1,4 +1,6 @@
 const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
 var cors = require('cors')
 const helper = require('./BlockChain/helper');
 const Invoke = require('./BlockChain/invoke');
@@ -9,7 +11,7 @@ const organization = require('./Routes/Organization');
 // const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account = require("./Routes/Account");
-const users=require("./Routes/Users")
+const users = require("./Routes/Users")
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
 const download = require('./Routes/downloadpdf')
@@ -28,19 +30,18 @@ var storage = multer.diskStorage({
   }
 })
 var upload = multer({ storage: storage })
-/**
- * App Variables
- */
 
-const app = express();
-app.use(express.json());
-app.use(cors())
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }
+});
+
 const port = process.env.PORT || "8000";
 const userorg = "Org1";
 require('dotenv').config();
-/**
- * Routes Definitions
- */
+app.use(express.json());
+app.use(cors())
 app.use("/api/account", account)
 app.use("/api/users", users)
 app.use("/api/certificate", certificate)
@@ -52,9 +53,13 @@ app.use("/download", download)
 app.use("/api/publish", publish)
 app.use("/image", image)
 
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+//Socket Connection
+
+io.on('connection', socket => {
+  socket.emit('message', "welcome u are connected");
+
+});
+//test file upload
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 app.post('/test', cpUpload, async (req, res) => {
   // var x = req.files
@@ -68,7 +73,6 @@ app.post('/test', cpUpload, async (req, res) => {
   console.log(typeof (1))
   res.json({ x: x })
 })
-
 // ---------------------------------------------dont  modify it----------------------------------------------------
 app.get("/api/RegisterUser", async function (req, res) {
 
@@ -141,7 +145,7 @@ app.post('/api/IssueCertificate', async function (req, res) {
     id: req.body.id
   }
   try {
-  var response = await Invoke.IssueCertificate(c1, "a1");
+    var response = await Invoke.IssueCertificate(c1, "a1");
     c1.message = "Transaction Successful..."
     res.status(200).json(c1);
   } catch (err) {
@@ -163,13 +167,17 @@ app.get('/api/VerifyCertificate/:id', async function (req, res) {
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
 });
-
 app.get("/user/:id", (req, res) => {
   res.status(200).send(req.params.id);
 });
 
-app.listen(port, () => {
-  console.log(`Listening to requests on http://localhost:${port}`);
+app.set('socketio', io);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+server.listen(port, () => {
+  console.log(`Listening to requests on http://localhost:${port}`)
+  console.log("socket server connected")
 });
 
 

@@ -9,6 +9,8 @@ const cert = require('../models/certificate');
 const invoke = require('../BlockChain/invoke');
 const cert_pdf = require('../js/CertificatePdf')
 const Image = require('../js/Image')
+const BlockChainCert = require('../js/BlockChainCert')
+const { fork } = require('child_process');
 router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var publish = {
@@ -31,7 +33,6 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Su
     }
 })
 router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
-    return res.status(500).send()
     try {
         var publish = {
             status: true,
@@ -40,17 +41,28 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
             publish_date: Date.now()
         }
         // var crt = await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
-        var bt =await batch.findOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false })
-        var crt = true
-        var t = await batch_cert.find({ batch_id: req.body.id })
-        if (crt) {
-            // res.status(200).send("Published successfully")
-            res.json(Object.assign({}, bt))
+        var bt = await batch.findOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false })
+        if (bt) {
+            var bcert = await batch_cert.find({ batch_id: req.body.id }).lean()
+            if (bcert && bcert.length > 1) {
+                const Publish = fork('./js/Publish.js');
+                Publish.send({ batch: bt._doc, bcert, publish });
+                Publish.on('message', result => {
+                    console.log("Processing completed at", Date.now())
+                    var io = req.app.get('socketio');
+                    io.sockets.emit("message", "Batch Publish Sucsessfully");
+                });
+                Publish.on('close', () => { console.log("kiling child") });
+                res.send("Processing started we will notify u soon")
+            } else {
+                res.status(409).send("batch must have more than 1 certificate to publish")
+            }
         } else {
-            res.status(404).send()
+            return res.status(404).send("batch not found")
         }
+
     } catch (err) {
-        res.status(500).send()
+        res.status(500).send(err)
     }
 })
 async function getblockchain_cert(crt, publish) {
