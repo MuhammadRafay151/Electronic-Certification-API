@@ -50,7 +50,7 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
                 Publish.on('message', result => {
                     console.log("Processing completed at", Date.now())
                     var io = req.app.get('socketio');
-                    io.sockets.emit("message", "Batch Publish Sucsessfully");
+                    io.sockets.to(req.user.org_id).emit("message", `${req.user.name} has Publish ${bt.batch_name} batch`);
                 });
                 Publish.on('close', () => { console.log("kiling child") });
                 res.send("Processing started we will notify u soon")

@@ -12,7 +12,16 @@ function authenticateToken(req, res, next) {
     next() // pass the execution off to whatever request the client intended
   })
 }
-
+function AuthenticateSocket(token,socket, next) {
+  jwt.verify(token, process.env.TOKEN_SECRET.toString(), (err, user) => {
+    if (err) return next(new Error('Authentication error'))
+    else {
+     
+      socket.user = user
+      next()
+    }// pass the execution off to whatever request the client intended
+  })
+}
 function generateAccessToken(username) {
   // expires after half and hour (1800 seconds = 30 minutes)
   return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
@@ -38,5 +47,6 @@ module.exports = {
 
   generateAccessToken: generateAccessToken,
   authenticateToken: authenticateToken,
+  AuthenticateSocket: AuthenticateSocket,
   CheckAuthorization: CheckAuthorization
 }

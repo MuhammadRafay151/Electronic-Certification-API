@@ -20,6 +20,7 @@ const publish = require('./Routes/Publish')
 const fs = require('fs').promises;
 var multer = require('multer');
 const { type } = require('os');
+const Auth = require('./Auth/Auth');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -54,11 +55,21 @@ app.use("/api/publish", publish)
 app.use("/image", image)
 
 //Socket Connection
-
-io.on('connection', socket => {
-  socket.emit('message', "welcome u are connected");
-
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  Auth.AuthenticateSocket(token, socket, next)
+  // console.log(token)
 });
+io.on('connection', socket => {
+  socket.join(socket.user.org_id);
+  socket.emit('message', "welcome u are connected");
+  socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
+  socket.on('close', () => {
+    console.log("going to disc")
+    socket.disconnect()
+  })
+});
+
 //test file upload
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 app.post('/test', cpUpload, async (req, res) => {
