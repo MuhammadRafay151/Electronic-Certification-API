@@ -24,7 +24,7 @@ router.get('/:id/:batch_id?', async (req, res) => {
         else {
             //batch certficate download
             var b1 = await batch.findOne({ _id: req.params.batch_id,'publish.status': true  })
-            var bcert = await batch_cert.findById({ _id: req.params.id, batch_id: req.params.batch_id })
+            var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
             var path="./uploads/"
             if (b1 && bcert) {
                 delete b1._doc.created_date

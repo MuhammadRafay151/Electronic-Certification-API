@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 var cors = require('cors')
+const config = require('config');
 const helper = require('./BlockChain/helper');
 const Invoke = require('./BlockChain/invoke');
 const certificate = require('./Routes/Certificate');
@@ -17,9 +18,9 @@ const count = require('./Routes/count')
 const download = require('./Routes/downloadpdf')
 const image = require('./Routes/Image')
 const publish = require('./Routes/Publish')
+const verify= require('./Routes/verify')
 const fs = require('fs').promises;
 var multer = require('multer');
-const { type } = require('os');
 const Auth = require('./Auth/Auth');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -31,13 +32,12 @@ var storage = multer.diskStorage({
   }
 })
 var upload = multer({ storage: storage })
-
+const { fork } = require('child_process');
 const io = require('socket.io')(server, {
   cors: {
     origin: '*',
   }
 });
-
 const port = process.env.PORT || "8000";
 const userorg = "Org1";
 require('dotenv').config();
@@ -52,7 +52,11 @@ app.use("/api/count", count)
 app.use("/api/organization", organization)
 app.use("/download", download)
 app.use("/api/publish", publish)
+app.use("/api/verify",verify)
 app.use("/image", image)
+//app config loading
+const app_config = config.get("app")
+app.set("BlockChain_Enable", app_config.BlockChain_Enable)
 
 //Socket Connection
 io.use((socket, next) => {
@@ -65,10 +69,17 @@ io.on('connection', socket => {
   socket.emit('message', "welcome u are connected");
   socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
   socket.on('close', () => {
-    console.log("going to disc")
     socket.disconnect()
   })
 });
+// Rabitmq consumer
+if (app.get("BlockChain_Enable")) {
+  const fk = fork('./MessageBroker/Subscriber.js')
+  fk.send("")
+  fk.on('message', obj => {
+    io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
+  });
+}
 
 //test file upload
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
@@ -190,6 +201,7 @@ server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")
 });
+
 
 
 
