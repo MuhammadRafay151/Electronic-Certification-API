@@ -10,7 +10,7 @@ const Roles = require('../js/Roles')
 router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         //needs to be wrap in transaction 
-        var r1 = await organization.findOneAndUpdate({ id: req.params.orgid }, {
+        var r1 = await organization.findOneAndUpdate({ _id: req.params.orgid }, {
             $inc: { ecertcount: parseInt(req.body.count) },
 
         }, { new: true })
@@ -42,7 +42,7 @@ router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
 router.put('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         //needs to be wrap in transaction 
-        var r1 = await organization.findOneAndUpdate({ id: req.user.org_id }, {
+        var r1 = await organization.findOneAndUpdate({ _id: req.user.org_id }, {
             $inc: { ecertcount: parseInt(req.body.count) },
 
         }, { new: true })

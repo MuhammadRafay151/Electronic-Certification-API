@@ -9,7 +9,6 @@ router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
     var org = new organization({
         name: req.body.name,
         email: req.body.email,
-        id: req.body.id,
         register_date: Date.now()
     })
     try {
@@ -22,9 +21,9 @@ router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
 })
 router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
-        var r1 = await organization.findOne({ id: req.body.id })
+        var r1 = await organization.findOne({ _id: req.body.id })
         if (r1) {
-            var r2 = await organization.findOneAndUpdate({ id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
+            var r2 = await organization.findOneAndUpdate({ _id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
             res.status(200).send("Status changed successfully")
         } else {
             res.status(400).send()
@@ -40,14 +39,14 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }
-    var result = await organization.find({ id: { $nin: [req.user.org_id] } }).sort({register_date:"-1"}).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
-    var total = await organization.find({ id: { $nin: [req.user.org_id] } }).countDocuments();
+    var result = await organization.find({ _id: { $nin: [req.user.org_id] } }).sort({register_date:"-1"}).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
+    var total = await organization.find({ _id: { $nin: [req.user.org_id] } }).countDocuments();
     result = { "list": result, totalcount: total }
     res.json(result)
 })
 router.get("/details", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
     try {
-        var result = await organization.findOne({ id: req.user.org_id });
+        var result = await organization.findOne({ _id: req.user.org_id });
         if (result) {
             res.json(result)
         } else {
@@ -59,7 +58,7 @@ router.get("/details", auth.authenticateToken, auth.CheckAuthorization([Roles.Su
 })
 router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
-        var result = await organization.findOne({ id: req.params.id });
+        var result = await organization.findOne({ _id: req.params.id });
         if (result) {
             res.json(result)
         } else {
@@ -76,7 +75,7 @@ router.put("/UserLimit/:orgid",auth.authenticateToken,auth.CheckAuthorization([R
         var total = await user.find({ "organization.id": req.params.org_id }).countDocuments()
         if (parseInt(req.body.count) < total)
             res.status(400).send(`Error: Count should be greater then total enrolled users:${total}`)
-        var r2 = await organization.findOneAndUpdate({ id: req.params.orgid }, { user_limit: req.body.count })
+        var r2 = await organization.findOneAndUpdate({ _id: req.params.orgid }, { user_limit: req.body.count })
         if (r2) {
             res.status(200).send("Limit Updated")
         } else {

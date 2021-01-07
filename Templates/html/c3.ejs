@@ -1,0 +1,137 @@
+<div class="container1 ">
+    <img
+      src="<%= img %>"
+      class="cert" alt="">
+    <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt=""
+      class="logo" />
+
+    <h3 class="t">
+      <%= data.title %>
+    </h3>
+
+    <p class="desc ">
+      It is to certify that <b> <%= data.name%></b> <%= data.description %>
+    </p>
+
+    <p class="p2 ">
+      Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
+  
+    </p>
+
+    <p class="p3 ">
+      verfication code: <%=data._id %>
+    </p>
+    
+    <div>
+      <p class="sign">Signature: _____________________</p>
+  
+      <img src="data:<%= data.signature.mimetype %>;base64,<%= data.signature.image %>" width="150" height="100"
+        alt="" class="isign" />
+    </div>
+  </div>
+  
+  <style>
+    .cert {
+      width: 29.7cm;
+      height: 21cm;
+    }
+  
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 13.094cm;
+      object-fit: contain;
+    }
+
+    .t {
+      position: absolute;
+      top: 140px;
+      color: black;
+      left: 0;
+      right: 0;
+      width: 27.7cm;
+      /* Assign a value */
+      margin: auto;
+      font-family: 'Comfortaa';
+      font-size: 50px; 
+      text-transform: uppercase;
+    }
+
+    .desc {
+      position: absolute;
+      top: 210px;
+      color: black;
+      left: 0;
+      right: 0;
+      width: 27.7cm;
+      margin: auto;
+      font-family: 'Comfortaa';
+      font-size: 20px;
+      text-align: justify; 
+    }
+
+    .p2 {
+      position: absolute;
+      top: 700px;
+      color: black;
+      left: 1cm;
+      font-family: 'Comfortaa';
+      font-size: 15px;
+    }
+  
+    .p3 {
+      position: absolute;
+      top: 730px;
+      color: black;
+      left: 1cm;
+      font-family: 'Comfortaa';
+      font-size: 15px;
+    }
+
+    .sign {
+      position: absolute;
+      top: 730px;
+      right: 1cm;
+      color: black;
+      font-family: 'Comfortaa';
+      font-size: 15px;
+    }
+  
+    .isign {
+      position: absolute;
+      top: 660px;
+      right: 1cm;
+      object-fit: contain;
+  
+    }
+  
+
+  
+    .container1 {
+      position: relative;
+      text-align: center;
+      color: white;
+      width: 29.7cm;
+      height: 21cm;
+     
+    }
+  
+    @media print {
+  
+      html,
+      body {
+        height: 100vh;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden;
+      }
+  
+    }
+  
+    .scroll {
+      width: 842px;
+      overflow-x: scroll;
+      overflow-y: hidden;
+    }
+  
+  </style>

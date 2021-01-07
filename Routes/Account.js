@@ -7,7 +7,7 @@ const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
-      var org = await organization.findOne({ id: req.params.orgid })
+      var org = await organization.findOne({ _id: req.params.orgid })
       var TotalEnroll = await user.find({ "organization.id": req.params.orgid }).countDocuments()
       var roles = []
       if (org) {
@@ -26,7 +26,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
             password: req.body.password,
             organization: {
                name: org.name,
-               id: org.id
+               id: org._id
             },
             roles: roles,
             register_date: Date.now()
@@ -45,27 +45,31 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
 });
 router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
    try {
-      var org = await organization.findOne({ id: req.user.org_id })
+      var org = await organization.findOne({ _id: req.user.org_id })
+      var TotalEnroll = await user.find({ "organization.id": req.user.org_id }).countDocuments()
       if (org) {
+         if (org.user_limit == TotalEnroll && !req.user.roles.includes(Roles.SuperAdmin)) {
+            return res.status(400).send("User limit reached")
+         }
          var s1 = new user({
             name: req.body.name,
             email: req.body.email,
             password: req.body.password,
             organization: {
                name: org.name,
-               id: org.id
+               id: org._id
             },
             roles: [Roles.Issuer],
             register_date: Date.now()
          });
          var response = await s1.save()
-         res.json({ message: response })
+         res.status(200).send("Registered Successfully")
       } else {
          res.status(404).send()
       }
    }
    catch (err) {
-      res.status(500).send()
+      res.status(500).send(err)
    }
 });
 

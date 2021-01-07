@@ -3,8 +3,11 @@ const router = express.Router()
 const batch = require('../models/batch')
 const batch_cert = require('../models/batch_certificates')
 const cert = require('../models/certificate');
+const mongoose =require("mongoose");
 router.get('/:id', async (req, res) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id))
+           return res.status(400).send("Invalid Code");
         if (req.app.get("BlockChain_Enable")) {
             res.status(503).send()
         } else {
@@ -27,10 +30,10 @@ router.get('/:id', async (req, res) => {
             }
             if (result.expiry_date && result.expiry_date - Date.now() < 0) {
                 result.is_expired = true
-                result.messsage = "The Certificate is verfied but the validity is expired"
+                result.message = "The Certificate is verfied but the validity is expired"
             } else {
                 result.is_expired = false
-                result.messsage = "The Certificate is verfied"
+                result.message = "The Certificate is verfied"
             }
             res.json(result)
         }

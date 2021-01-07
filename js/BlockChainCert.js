@@ -15,6 +15,7 @@ async function GetBlockChainCert(crt, publish) {
         pdf: pdf_base64,
         docType: "ecert",
     }
+    //should add organization data in the object also the parent organization refrence as well
     return BlockChainCert
 }
 async function ProcessBatchCerts(batch, batchcerts, publish) {

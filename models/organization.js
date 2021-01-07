@@ -13,11 +13,6 @@ const Organization = mongoose.Schema({
         type: String,
         required: true
     },
-    id: {
-        type: String,
-        unique: true,
-        required: true
-    },
     ecertcount: {
         type: Number,
         default: 0
