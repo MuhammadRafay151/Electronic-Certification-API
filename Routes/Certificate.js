@@ -3,6 +3,7 @@ const auth = require('../Auth/Auth')
 const router = express.Router()
 const cert = require('../models/certificate');
 const user = require('../models/user')
+const files = require('../models/files')
 var multer = require('multer')
 var upload = multer()
 var pagination = require('./../js/pagination');
@@ -12,14 +13,22 @@ var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature'
 router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
     var u1 = await user.findById(req.user.uid)
+    var logo = new files({
+        binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype
+    })
+    var signature = new files({
+        binary: req.files.signature[0].buffer, mimetype: req.files.signature[0].mimetype
+    })
+    logo = await logo.save()
+    signature = await signature.save()
     var obj = {
         title: req.body.title,
         description: req.body.description,
         name: req.body.name,
         email: req.body.email,
         instructor_name: req.body.instructor_name,
-        logo: { image: req.files.logo[0].buffer.toString('base64'), mimetype: req.files.logo[0].mimetype },
-        signature: { image: req.files.signature[0].buffer.toString('base64'), mimetype: req.files.signature[0].mimetype },
+        logo: logo._id,
+        signature: signature._id,
         issuedby: {
             issuer_name: u1.name,
             issuer_email: u1.email,
@@ -40,7 +49,7 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
     catch (err) {
         res.json(err)
     }
-
+    //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
 router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     try {
@@ -80,13 +89,13 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
         var perpage = 5
         var pageno = req.query.pageno
         var query = null
-        var sort=null
+        var sort = null
         if (req.query.pub) {
             query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-            sort={"publish.publish_date":-1}
+            sort = { "publish.publish_date": -1 }
         } else {
             query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
-            sort={issue_date:-1}
+            sort = { issue_date: -1 }
         }
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }).sort(sort).skip(pagination.Skip(pageno, perpage)).limit(perpage);
@@ -101,7 +110,7 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
             result = await cert.findOne(query, { _id: 0, issue_date: 0 });
         } else {
             //for certificate view
-            var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id}
+            var query = { _id: req.params.id, 'issuedby.org_id': req.user.org_id }
             result = await cert.findOne(query);
         }
         if (result)

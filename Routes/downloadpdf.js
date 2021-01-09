@@ -6,14 +6,19 @@ const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
 var ejs = require('ejs');
 var cert_pdf = require('../js/CertificatePdf')
-const Image = require('../js/Image')
+const files = require('../models/files')
+// const Image = require('../js/Image')
 router.get('/:id/:batch_id?', async (req, res) => {
     try {
         // var htmlContent = await fs.readFile('Templates\\c1.ejs', 'utf8');
         if (req.params.batch_id == null) {
             //single download
-            var result = await cert.findOne({ _id: req.params.id, 'publish.status': true });
+            var result = await cert.findOne({ _id: req.params.id, 'publish.status': true }).lean();
             if (result) {
+                var logo = await files.findOne({ _id: result.logo })
+                var signature = await files.findOne({ _id: result.signature })
+                result.logo = { image: Buffer.from(logo.binary.buffer).toString('base64'), mimetype: logo.mimetype }
+                result.signature = { image: Buffer.from(signature.binary.buffer).toString('base64'), mimetype: signature.mimetype }
                 var buffer = await cert_pdf.GetPdf_Buffer(result)
                 // var buff=Buffer.from(x, 'base64');
                 res.contentType("application/pdf");
@@ -27,13 +32,14 @@ router.get('/:id/:batch_id?', async (req, res) => {
             var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
             var path = "./uploads/"
             if (b1 && bcert) {
+                var logo = await files.findOne({ _id: b1.logo })
+                var signature = await files.findOne({ _id: b1.signature })
                 b1.issue_date = bcert.issue_date
                 b1._id = bcert._id
                 b1.name = bcert.name
                 b1.email = bcert.email
-                b1.logo.image = await Image.GetImgBase64(path + b1.logo.image)
-                b1.signature.image = await Image.GetImgBase64(path + b1.signature.image)
-                console.log(b1._id, b1.name)
+                b1.logo = { image: Buffer.from(logo.binary.buffer).toString('base64'), mimetype: logo.mimetype }
+                b1.signature = { image: Buffer.from(signature.binary.buffer).toString('base64'), mimetype: signature.mimetype }
                 var buffer = await cert_pdf.GetPdf_Buffer(b1)
                 res.contentType("application/pdf");
                 return res.send(buffer)
