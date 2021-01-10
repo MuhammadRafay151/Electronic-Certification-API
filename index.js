@@ -189,6 +189,9 @@ app.get('/api/VerifyCertificate/:id', async function (req, res) {
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to Certifis <br/>Create digitally verified certificates<br/>Enjoy!");
 });
+app.get("/home/wel", (req, res) => {
+  res.status(200).send("Welcome to Certifis <br/>Create digitally verified certificates<br/>Enjoy!");
+});
 app.get("/user/:id", (req, res) => {
   res.status(200).send(req.params.id);
 });
