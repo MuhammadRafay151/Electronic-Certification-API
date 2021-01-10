@@ -187,7 +187,7 @@ app.get('/api/VerifyCertificate/:id', async function (req, res) {
   }
 })
 app.get("/", (req, res) => {
-  res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
+  res.status(200).send("Welcome to Certifis <br/>Create digitally verified certificates<br/>Enjoy!");
 });
 app.get("/user/:id", (req, res) => {
   res.status(200).send(req.params.id);
