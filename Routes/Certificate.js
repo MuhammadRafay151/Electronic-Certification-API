@@ -130,4 +130,29 @@ router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
         res.send(err)
     }
 })
+router.get("/org_pub/:org_id/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    //only super admin can useit to gather published certificate data of other orginzations
+    if (req.params.id == null) {
+        //for list read
+        var perpage = 5
+        var pageno = req.query.pageno
+        var query = null
+        var sort = null
+        query = { 'issuedby.org_id': req.params.org_id, 'publish.status': true }
+        sort = { "publish.publish_date": -1 }
+        if (isNaN(parseInt(pageno))) { pageno = 1 }
+        var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }).sort(sort).skip(pagination.Skip(pageno, perpage)).limit(perpage);
+        var total = await cert.find(query).countDocuments();
+        result = { "list": result, totalcount: total }
+        res.json(result)
+    } else {
+        var result = null;
+        var query = { _id: req.params.id, 'issuedby.org_id': req.params.org_id }
+        result = await cert.findOne(query);
+        if (result)
+            res.json(result)
+        else
+            res.status(404).send()
+    }
+})
 module.exports = router

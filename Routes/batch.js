@@ -131,5 +131,17 @@ router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
     }
 
 })
-
+router.get("/org_pub/:org_id/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    var perpage = 5
+    var pageno = req.query.pageno
+    var query = null
+    var sort = null
+    query = { "createdby.org_id": req.params.org_id, 'publish.status': true }
+    sort = { "publish.publish_date": -1 }
+    if (isNaN(parseInt(pageno))) { pageno = 1 }
+    var result = await batch.find(query).sort(sort).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
+    var total = await batch.find(query).countDocuments();
+    result = { "list": result, totalcount: total }
+    res.json(result)
+})
 module.exports = router
