@@ -4,7 +4,7 @@ const Templates = require('../Templates/Register')
 var fs = require('fs').promises;
 var ejs = require('ejs');
 const mime = require('mime')
-
+var path = require("path")
 async function GetPdf_Base64(data) {
 
     var buffer = await GetPdf_Buffer(data)
@@ -12,8 +12,9 @@ async function GetPdf_Base64(data) {
 }
 async function GetPdf_Buffer(data) {
     var template = Templates.find(data.template_id)
-    var htmlContent = await fs.readFile('Templates\\html\\' + template.html, 'utf8');
-    var background_img = await image.GetImgBase64('Templates\\backgrounds\\' + template.img)
+    
+    var htmlContent = await fs.readFile(path.join(__dirname, '..',"Templates","html" , template.html) , 'utf8');
+    var background_img = await image.GetImgBase64(path.join(__dirname, '..',"Templates","backgrounds" , template.img) )
     background_img = `data:${mime.getType(template.img)};base64,${background_img}`
     var htmlRenderized = ejs.render(htmlContent, { data: data, img: background_img });
     const browser = await puppeteer.launch({
