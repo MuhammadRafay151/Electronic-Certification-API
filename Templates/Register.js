@@ -18,7 +18,7 @@ const templates = [
     {
         id: "c3",
         html: "c3.ejs",
-        img: "c3.PNG",
+        img: "c3.png",
         TitleLength: 32,
         NameLength: 70,
         DiscriptionLength: 1349,
@@ -26,7 +26,7 @@ const templates = [
     {
         id: "c4",
         html: "c4.ejs",
-        img: "c4.PNG",
+        img: "c4.png",
         TitleLength: 32,
         NameLength: 92,
         DiscriptionLength: 933,
@@ -34,7 +34,7 @@ const templates = [
     {
         id: "c5",
         html: "c5.ejs",
-        img: "c5.PNG",
+        img: "c5.png",
         TitleLength: 39,
         NameLength: 44,
         DiscriptionLength: 791,
