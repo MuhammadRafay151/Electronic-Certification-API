@@ -19,7 +19,7 @@ const Organization = mongoose.Schema({
     },
     user_limit: {
         type: Number,
-        default: 0
+        default: 1
     },
 
     status: {

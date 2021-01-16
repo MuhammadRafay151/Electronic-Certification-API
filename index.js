@@ -19,6 +19,7 @@ const download = require('./Routes/downloadpdf')
 const image = require('./Routes/Image')
 const publish = require('./Routes/Publish')
 const verify= require('./Routes/verify')
+const dashboard= require('./Routes/DashBoard')
 const fs = require('fs').promises;
 var multer = require('multer');
 const Auth = require('./Auth/Auth');
@@ -53,6 +54,7 @@ app.use("/api/organization", organization)
 app.use("/download", download)
 app.use("/api/publish", publish)
 app.use("/api/verify",verify)
+app.use("/api/dashboard",dashboard)
 app.use("/image", image)
 //app config loading
 const app_config = config.get("app")
