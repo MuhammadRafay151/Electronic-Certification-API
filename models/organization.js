@@ -21,7 +21,18 @@ const Organization = mongoose.Schema({
         type: Number,
         default: 1
     },
-
+    phone: {
+        type: String,
+        require: true
+    },
+    country_code: {
+        type: String,
+        require: true
+    },
+    address: {
+        type: String,
+        require: true
+    },
     status: {
         active: {
             type: Boolean,

@@ -5,6 +5,7 @@ const Auth = require('../Auth/Auth')
 var mongoose = require('mongoose');
 const Roles = require('../js/Roles')
 const organization = require('../models/organization')
+const RFT = require('../models/tokens');
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ _id: req.params.orgid })
@@ -82,8 +83,11 @@ router.post('/login', async function (req, res) {
       }
       else if (response.status.active == true) {
          var token = await Auth.generateAccessToken({ uid: response._id, email: response.email, name: response.name, org_id: response.organization.id, roles: response.roles })
+         var RefreshToken = await Auth.generateRefreshToken({ uid: response._id, email: response.email, name: response.name, org_id: response.organization.id, roles: response.roles })
+         await new RFT({ token: RefreshToken }).save()
          delete response._doc.password
          response._doc.token = token
+         response._doc.RefreshToken = RefreshToken
          res.json(response)
       } else {
          res.status(403).json({ message: "Account has been disabled" })
@@ -92,6 +96,42 @@ router.post('/login', async function (req, res) {
       res.send(err)
    }
 
+});
+router.post('/refresh_token', async function (req, res) {
+
+   try {
+      var token = await RFT.findOne({ token: req.body.RefreshToken }).lean();
+      if (token == null) {
+         res.status(401).json({ message: "No token found" })
+      } else {
+         try {
+            let result = await Auth.authenticateRefreshToken(token.token)
+            let u1 = await user.findOne({ _id: result.uid })
+            if (u1.status.active == true) {
+               var token = await Auth.generateAccessToken({ uid: u1._id, email: u1.email, name: u1.name, org_id: u1.organization.id, roles: u1.roles })
+               res.json({ token })
+            } else {
+               res.status(403).json({ message: "Account has been disabled" })
+            }
+         } catch (err) {
+            await RFT.deleteOne({ token: req.body.RefreshToken })
+            return res.status(403).send(err)
+         }
+
+      }
+   } catch (err) {
+      res.status(500).send()
+   }
+});
+router.post('/sign_out', async function (req, res) {
+
+   try {
+      await RFT.deleteOne({ token: req.body.RefreshToken })
+      res.send("signed out")
+   }
+   catch (err) {
+      res.status(500).send()
+   }
 });
 
 router.put('/togglestatus/:orgid/:userid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res) {

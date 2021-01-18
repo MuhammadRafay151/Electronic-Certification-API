@@ -12,19 +12,28 @@ function authenticateToken(req, res, next) {
     next() // pass the execution off to whatever request the client intended
   })
 }
-function AuthenticateSocket(token,socket, next) {
+async function authenticateRefreshToken(token) {
+  let result = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET.toString())
+  return result
+}
+function AuthenticateSocket(token, socket, next) {
   jwt.verify(token, process.env.TOKEN_SECRET.toString(), (err, user) => {
     if (err) return next(new Error('Authentication error'))
     else {
-     
+
       socket.user = user
       next()
     }// pass the execution off to whatever request the client intended
   })
 }
-function generateAccessToken(username) {
+
+function generateAccessToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
-  return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+  return jwt.sign(obj, process.env.TOKEN_SECRET, { expiresIn: '1200s' });
+}
+function generateRefreshToken(obj) {
+  // expires after half and hour (1800 seconds = 30 minutes)
+  return jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 }
 function CheckAuthorization(AllowedRoles) {
   return async (req, res, next) => {
@@ -48,5 +57,8 @@ module.exports = {
   generateAccessToken: generateAccessToken,
   authenticateToken: authenticateToken,
   AuthenticateSocket: AuthenticateSocket,
-  CheckAuthorization: CheckAuthorization
+  CheckAuthorization: CheckAuthorization,
+  generateRefreshToken: generateRefreshToken,
+  authenticateRefreshToken: authenticateRefreshToken
+
 }

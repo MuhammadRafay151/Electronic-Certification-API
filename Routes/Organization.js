@@ -9,6 +9,9 @@ router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
     var org = new organization({
         name: req.body.name,
         email: req.body.email,
+        phone: req.body.phone,
+        country_code: req.body.country_code,
+        address: req.body.address,
         register_date: Date.now()
     })
     try {
@@ -39,7 +42,7 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }
-    var result = await organization.find({ _id: { $nin: [req.user.org_id] } }).sort({register_date:"-1"}).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
+    var result = await organization.find({ _id: { $nin: [req.user.org_id] } }).sort({ register_date: "-1" }).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
     var total = await organization.find({ _id: { $nin: [req.user.org_id] } }).countDocuments();
     result = { "list": result, totalcount: total }
     res.json(result)
@@ -68,7 +71,7 @@ router.get("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
         res.status(500).send()
     }
 })
-router.put("/UserLimit/:orgid",auth.authenticateToken,auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+router.put("/UserLimit/:orgid", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         if (!req.body.count)
             res.status(400).send()
