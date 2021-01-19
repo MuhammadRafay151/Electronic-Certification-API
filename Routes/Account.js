@@ -30,7 +30,10 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
                id: org._id
             },
             roles: roles,
-            register_date: Date.now()
+            register_date: Date.now(),
+            phone: req.body.phone,
+            country_code: req.body.country_code,
+            address: req.body.address,
          });
          var response = await s1.save()
          res.status(200).send("Registered Successfully")
@@ -41,7 +44,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
    catch (err) {
       // if (err.code == 11000) { err = { message: "email already registered" } }
       // res.json({ message: err })
-      res.status(500).send()
+      res.status(500).send(err)
    }
 });
 router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
@@ -61,7 +64,10 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
                id: org._id
             },
             roles: [Roles.Issuer],
-            register_date: Date.now()
+            register_date: Date.now(),
+            phone: req.body.phone,
+            country_code: req.body.country_code,
+            address: req.body.address,
          });
          var response = await s1.save()
          res.status(200).send("Registered Successfully")
@@ -73,7 +79,45 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
       res.status(500).send(err)
    }
 });
+router.put('/UpdateProfile/:id/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
+   try {
+      var u1 = await user.findOneAndUpdate({ _id: req.params.id, 'organization.id': req.params.orgid }, {
+         name: req.body.name,
+         email: req.body.email,
+         phone: req.body.phone,
+         country_code: req.body.country_code,
+         address: req.body.address,
+      }, { new: true })
+      if (u1) {
+         res.json(u1)
+      } else {
+         res.status(404).send()
+      }
+   }
+   catch (err) {
 
+      res.status(500).send(err)
+   }
+});
+router.put('/UpdateProfile/:id', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
+   try {
+      var u1 = await user.findOneAndUpdate({ _id: req.params.id, 'organization.id': req.user.org_idF }, {
+         name: req.body.name,
+         email: req.body.email,
+         phone: req.body.phone,
+         country_code: req.body.country_code,
+         address: req.body.address,
+      }, { new: true })
+      if (u1) {
+         res.json(u1)
+      } else {
+         res.status(404).send()
+      }
+   }
+   catch (err) {
+      res.status(500).send(err)
+   }
+});
 router.post('/login', async function (req, res) {
 
    try {

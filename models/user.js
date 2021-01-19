@@ -24,6 +24,15 @@ const User = mongoose.Schema({
         
     },
     register_date:{type:Date},
+    phone: {
+        type: String,
+    },
+    country_code: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
 })
 
 module.exports = mongoose.model("User", User)
