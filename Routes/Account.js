@@ -79,9 +79,9 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile/:id/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
+router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
-      var u1 = await user.findOneAndUpdate({ _id: req.params.id, 'organization.id': req.params.orgid }, {
+      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.params.orgid }, {
          name: req.body.name,
          email: req.body.email,
          phone: req.body.phone,
@@ -99,9 +99,9 @@ router.put('/UpdateProfile/:id/:orgid', Auth.authenticateToken, Auth.CheckAuthor
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile/:id', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
+router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
    try {
-      var u1 = await user.findOneAndUpdate({ _id: req.params.id, 'organization.id': req.user.org_idF }, {
+      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.user.org_id }, {
          name: req.body.name,
          email: req.body.email,
          phone: req.body.phone,
