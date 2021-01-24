@@ -57,8 +57,8 @@ router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmi
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }
-    var result = await organization.find({ _id: { $nin: [req.user.org_id] } }).sort({ register_date: "-1" }).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
-    var total = await organization.find({ _id: { $nin: [req.user.org_id] } }).countDocuments();
+    var result = await organization.find().sort({ register_date: "-1" }).skip(pagination.Skip(pageno, perpage)).limit(perpage);;
+    var total = await organization.find().countDocuments();
     result = { "list": result, totalcount: total }
     res.json(result)
 })

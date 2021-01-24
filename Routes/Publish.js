@@ -10,7 +10,7 @@ const invoke = require('../BlockChain/invoke');
 const cert_pdf = require('../js/CertificatePdf')
 const MsgBroker = require("../MessageBroker/publisher")
 
-router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var publish = {
             status: true,
@@ -33,7 +33,7 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Su
         res.status(500).send()
     }
 })
-router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var bt = await batch.exists({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false })
         if (bt) {

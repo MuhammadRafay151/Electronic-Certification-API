@@ -8,8 +8,6 @@ const batch = require('../models/batch')
 const bcert = require('../models/batch_certificates')
 const auth = require('../Auth/Auth')
 const Roles = require('../js/Roles');
-const batch_certificates = require('../models/batch_certificates');
-
 
 router.get("/userstats", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
     var x = await user.aggregate([{
@@ -101,7 +99,7 @@ router.get("/batchpublicationhistory", auth.authenticateToken, auth.CheckAuthori
     var PublicationHistory = await BatchPublicationHistorys(req.user.org_id)
     res.json(PublicationHistory)
 })
-router.get("/organizationstats", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
+router.get("/organizationstats", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     var temp = (await OrganizationStats())[0]
     res.json(temp)
 })

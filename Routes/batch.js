@@ -51,7 +51,7 @@ router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Super
     }
 })
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     var u1 = await user.findById(req.user.uid)
     var logo = new files({
         binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype
@@ -91,7 +91,7 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdm
     }
     //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
-router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
     try {
         var data = {
@@ -121,7 +121,7 @@ router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperA
     }
 
 })
-router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.delete("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
 
     try {
         var result = await batch.findOneAndDelete({ _id: req.params.id, "createdby.org_id": req.user.org_id, 'publish.status': false })

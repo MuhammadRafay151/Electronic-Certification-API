@@ -39,39 +39,8 @@ router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
     }
 
 })
-router.put('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    try {
-        //needs to be wrap in transaction 
-        var r1 = await organization.findOneAndUpdate({ _id: req.user.org_id }, {
-            $inc: { ecertcount: parseInt(req.body.count) },
 
-        }, { new: true })
-
-        if (r1) {
-            var c1 = new count({
-                IsIncrease: true,
-                Count: req.body.count,
-                Org_Id: req.user.org_id,
-                date: Date.now(),
-                by: {
-                    name: req.user.name,
-                    id: req.user.uid
-                }
-            })
-            var r2 = await c1.save()
-            res.status(200).send("Count Incremented successfully")
-        }
-        else {
-            res.status(404).send()
-        }
-
-    }
-    catch (err) {
-        res.status(500).send()
-    }
-
-})
-router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
+router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
     var perpage = 5
     var pageno = req.query.pageno
     if (isNaN(parseInt(pageno))) { pageno = 1 }

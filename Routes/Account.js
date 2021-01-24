@@ -47,7 +47,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
       res.status(500).send(err)
    }
 });
-router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
+router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ _id: req.user.org_id })
       var TotalEnroll = await user.find({ "organization.id": req.user.org_id }).countDocuments()
@@ -126,8 +126,12 @@ router.post('/login', async function (req, res) {
          res.status(401).json({ message: "Invalid username or password" })
       }
       else if (response.status.active == true) {
-         var token = await Auth.generateAccessToken({ uid: response._id, email: response.email, name: response.name, org_id: response.organization.id, roles: response.roles })
-         var RefreshToken = await Auth.generateRefreshToken({ uid: response._id, email: response.email, name: response.name, org_id: response.organization.id, roles: response.roles })
+         let token_data = { uid: response._id, email: response.email, name: response.name, roles: response.roles }
+         if (response.organization) {
+            token_data.org_id = response.organization.id
+         }
+         var token = await Auth.generateAccessToken(token_data)
+         var RefreshToken = await Auth.generateRefreshToken(token_data)
          await new RFT({ token: RefreshToken }).save()
          delete response._doc.password
          response._doc.token = token
@@ -152,7 +156,11 @@ router.post('/refresh_token', async function (req, res) {
             let result = await Auth.authenticateRefreshToken(token.token)
             let u1 = await user.findOne({ _id: result.uid })
             if (u1.status.active == true) {
-               var token = await Auth.generateAccessToken({ uid: u1._id, email: u1.email, name: u1.name, org_id: u1.organization.id, roles: u1.roles })
+               let token_data = { uid: u1._id, email: u1.email, name: u1.name, roles: u1.roles }
+               if (u1.organization) {
+                  token_data.org_id = u1.organization.id
+               }
+               var token = await Auth.generateAccessToken(token_data)
                res.json({ token })
             } else {
                res.status(403).json({ message: "Account has been disabled" })

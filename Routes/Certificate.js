@@ -10,7 +10,7 @@ var pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
 
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
     var u1 = await user.findById(req.user.uid)
     var logo = new files({
@@ -51,7 +51,7 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
     }
     //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
-router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     try {
         var u1 = await user.findById(req.user.uid)
         var temp = {
@@ -119,7 +119,7 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Super
             res.status(404).send()
     }
 })
-router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
 
         var c = await cert.findOneAndDelete({ _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false })

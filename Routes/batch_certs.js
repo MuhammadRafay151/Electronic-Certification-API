@@ -6,7 +6,7 @@ const batch = require('../models/batch')
 const Roles = require('../js/Roles')
 const pagination = require('../js/pagination');
 //api handle requests to manipulate certificates in batches.
-router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var query = null
         if (req.query.pub) {
@@ -33,7 +33,7 @@ router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.
         res.status(500).send("server error")
     }
 })
-router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
 
     var b1 = await batch.findById(req.body.batch_id)
     // batch_cert.insertMany(req.body)
@@ -53,7 +53,7 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdm
 
 
 })
-router.put("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.put("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var b1 = await batch.exists({ _id: req.body.batch_id, "createdby.org_id": req.user.org_id })
         if (b1) {
@@ -78,7 +78,7 @@ router.put("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmi
     }
 
 })
-router.delete("/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.delete("/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     var temp = await batch.exists({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id });
     if (temp) {
         var result = await batch_cert.findOneAndDelete({ _id: req.params.id, batch_id: req.params.batch_id })
@@ -88,7 +88,7 @@ router.delete("/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization(
         res.status(404).send("resource not found")
     }
 })
-router.get("/view/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.get("/view/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     var b1 = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id })
     var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
     if (b1 && bcert) {
@@ -143,7 +143,7 @@ function process_batch(data, req) {
     return { list, error }
 }
 
-router.get("/org_pub/:org_id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.get("/org_pub/:org_id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         var query = query = { _id: req.params.batch_id, 'createdby.org_id': req.params.org_id, 'publish.status': true }
         var sort = { name: 1 }
