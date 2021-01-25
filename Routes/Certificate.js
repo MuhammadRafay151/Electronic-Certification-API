@@ -82,21 +82,14 @@ router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin,
         res.json(err)
     }
 })
-router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
+router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
 
     if (req.params.id == null) {
         //for list read
         var perpage = 5
         var pageno = req.query.pageno
-        var query = null
-        var sort = null
-        if (req.query.pub) {
-            query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-            sort = { "publish.publish_date": -1 }
-        } else {
-            query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
-            sort = { issue_date: -1 }
-        }
+        var query = GenerateQuery(req)
+        var sort = GenerateSortQuery(req)
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }).sort(sort).skip(pagination.Skip(pageno, perpage)).limit(perpage);
         var total = await cert.find(query).countDocuments();
@@ -155,4 +148,64 @@ router.get("/org_pub/:org_id/:id?", auth.authenticateToken, auth.CheckAuthorizat
             res.status(404).send()
     }
 })
+function GenerateQuery(req) {
+    let query = {}
+    let dateprop = ""
+    if (req.query.pub) {
+        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
+        dateprop = "publish.publish_date"
+    } else {
+        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
+        dateprop = "issue_date"
+    }
+    if (req.query.name) {
+        query.name = { $regex: `.*${req.query.name}.*`, $options: 'i' }
+    }
+    if (req.query.title) {
+        query.title = { $regex: `.*${req.query.title}.*`, $options: 'i' }
+    }
+    if (req.query.fromdate && req.query.todate) {
+        let fromdate = new Date(req.query.fromdate)
+        fromdate.setHours(23, 59, 59, 999);
+        let todate = new Date(req.query.todate)
+        todate.setHours(0, 0, 0, 0);
+        query[dateprop] = {
+            $lte: new Date(fromdate),
+            $gte: new Date(todate)
+        }
+
+    } else if (req.query.fromdate) {
+        let fromdate = new Date(req.query.fromdate)
+        fromdate.setHours(23, 59, 59, 999);
+        query[dateprop] = {
+            $lte: new Date(fromdate),
+        }
+    } else if (req.query.todate) {
+        let todate = new Date(req.query.todate)
+        todate.setHours(0, 0, 0, 0);
+        query[dateprop] = {
+            $gte: new Date(todate)
+        }
+    }
+    return query
+}
+function GenerateSortQuery(req) {
+    let sort = null
+    if (req.query.pub) {
+        //  query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
+        if (req.query.sort) {
+            sort = req.query.sort === "asc" ? { "publish.publish_date": 1 } : { "publish.publish_date": -1 }
+        } else {
+            sort = { "publish.publish_date": -1 }
+        }
+
+    } else {
+        if (req.query.sort) {
+            sort = req.query.sort === "asc" ? { issue_date: 1 } : { issue_date: -1 }
+        } else {
+            sort = { issue_date: -1 }
+        }
+    }
+    return sort
+}
 module.exports = router
