@@ -8,7 +8,8 @@ var multer = require('multer')
 var upload = multer()
 var pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
-
+const { SingleSearch } = require("../js/search")
+const { SingleCertSort } = require("../js/sort")
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
@@ -88,8 +89,10 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin
         //for list read
         var perpage = 5
         var pageno = req.query.pageno
-        var query = GenerateQuery(req)
-        var sort = GenerateSortQuery(req)
+        let gq = new SingleSearch(req)
+        let gqs = new SingleCertSort(req)
+        var query = gq.GenerateQuery()
+        var sort = gqs.GenerateSortQuery()
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await cert.find(query, { logo: 0, signature: 0, certificate_img: 0 }).sort(sort).skip(pagination.Skip(pageno, perpage)).limit(perpage);
         var total = await cert.find(query).countDocuments();
@@ -158,7 +161,7 @@ function GenerateQuery(req) {
         query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
         dateprop = "issue_date"
     }
-    if (req.query.name) {
+    if (req.query.batch_name) {
         query.name = { $regex: `.*${req.query.name}.*`, $options: 'i' }
     }
     if (req.query.title) {

@@ -144,4 +144,64 @@ router.get("/org_pub/:org_id/", Auth.authenticateToken, Auth.CheckAuthorization(
     result = { "list": result, totalcount: total }
     res.json(result)
 })
+function GenerateQuery(req) {
+    let query = {}
+    let dateprop = ""
+    if (req.query.pub) {
+        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
+        dateprop = "publish.publish_date"
+    } else {
+        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
+        dateprop = "created_date"
+    }
+    if (req.query.name) {
+        query.name = { $regex: `.*${req.query.name}.*`, $options: 'i' }
+    }
+    if (req.query.title) {
+        query.title = { $regex: `.*${req.query.title}.*`, $options: 'i' }
+    }
+    if (req.query.fromdate && req.query.todate) {
+        let fromdate = new Date(req.query.fromdate)
+        fromdate.setHours(23, 59, 59, 999);
+        let todate = new Date(req.query.todate)
+        todate.setHours(0, 0, 0, 0);
+        query[dateprop] = {
+            $lte: new Date(fromdate),
+            $gte: new Date(todate)
+        }
+
+    } else if (req.query.fromdate) {
+        let fromdate = new Date(req.query.fromdate)
+        fromdate.setHours(23, 59, 59, 999);
+        query[dateprop] = {
+            $lte: new Date(fromdate),
+        }
+    } else if (req.query.todate) {
+        let todate = new Date(req.query.todate)
+        todate.setHours(0, 0, 0, 0);
+        query[dateprop] = {
+            $gte: new Date(todate)
+        }
+    }
+    return query
+}
+function GenerateSortQuery(req) {
+    let sort = null
+    if (req.query.pub) {
+        //  query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
+        if (req.query.sort) {
+            sort = req.query.sort === "asc" ? { "publish.publish_date": 1 } : { "publish.publish_date": -1 }
+        } else {
+            sort = { "publish.publish_date": -1 }
+        }
+
+    } else {
+        if (req.query.sort) {
+            sort = req.query.sort === "asc" ? { created_date: 1 } : { created_date: -1 }
+        } else {
+            sort = { created_date: -1 }
+        }
+    }
+    return sort
+}
 module.exports = router
