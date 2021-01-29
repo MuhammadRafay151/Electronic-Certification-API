@@ -116,7 +116,7 @@ async function SingleCreationHistory(org_id) {
             }
         },
         { $project: { _id: 0, } },
-        { $sort: { date: -1 } },
+        { $sort: { date: 1 } },
         { $limit: 14 }
     ])
     return TotalSingle
@@ -139,7 +139,7 @@ async function BatchCreationHistory(org_id) {
             }
         },
         { $project: { _id: 0, } },
-        { $sort: { date: -1 } },
+        { $sort: { date: 1 } },
         { $limit: 14 }
     ])
     return TotalBatchCert
@@ -157,7 +157,7 @@ async function SinglePublicationHistorys(org_id) {
             }
         },
         { $project: { _id: 0, } },
-        { $sort: { date: -1 } },
+        { $sort: { date: 1 } },
         { $limit: 14 }
     ])
     return TotalSinglePublications
@@ -180,7 +180,7 @@ async function BatchPublicationHistorys(org_id) {
             }
         },
         { $project: { _id: 0, } },
-        { $sort: { date: -1 } },
+        { $sort: { date: 1 } },
         { $limit: 14 }
     ])
     return TotalBatchCertPublications

@@ -87,7 +87,7 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin
 
     if (req.params.id == null) {
         //for list read
-        var perpage = 5
+        var perpage = 10
         var pageno = req.query.pageno
         let gq = new SingleSearch(req)
         let gqs = new SingleCertSort(req)

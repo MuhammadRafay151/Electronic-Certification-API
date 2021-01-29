@@ -207,7 +207,4 @@ server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")
 });
-
-
-
 //  require('crypto').randomBytes(64).toString('hex')

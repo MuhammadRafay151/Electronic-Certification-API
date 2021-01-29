@@ -77,14 +77,14 @@ class BatchesSearch extends search {
         let query = {}
         let dateprop = ""
         if (this.pub) {
-            query = { 'issuedby.org_id': this.uid, 'publish.status': true }
+            query = { 'createdby.org_id': this.uid, 'publish.status': true }
             dateprop = "publish.publish_date"
         } else {
-            query = { 'issuedby.org_id': this.uid, 'publish.status': false }
+            query = { 'createdby.org_id': this.uid, 'publish.status': false }
             dateprop = "created_date"
         }
         if (this.batch_name) {
-            query.name = { $regex: `.*${this.batch_name}.*`, $options: 'i' }
+            query.batch_name = { $regex: `.*${this.batch_name}.*`, $options: 'i' }
         }
         if (this.title) {
             query.title = { $regex: `.*${this.title}.*`, $options: 'i' }

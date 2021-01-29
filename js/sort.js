@@ -48,7 +48,7 @@ class BatchCertSort extends Sort {
             }
 
         } else {
-            if (sort) {
+            if (this.sort) {
                 sort = this.sort === "asc" ? { created_date: 1 } : { created_date: -1 }
             } else {
                 sort = { created_date: -1 }

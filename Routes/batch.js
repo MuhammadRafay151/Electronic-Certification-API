@@ -18,20 +18,17 @@ var multer = require('multer')
 const files = require('../models/files')
 var upload = multer()
 const Roles = require('../js/Roles')
+const { BatchesSearch } = require("../js/search")
+const { BatchCertSort } = require("../js/sort")
 //create empty batches
 router.get("/:id?", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin, Roles.Issuer]), async (req, res) => {
     if (req.params.id == null) {
-        var perpage = 5
+        var perpage = 10
         var pageno = req.query.pageno
-        var query = null
-        var sort = null
-        if (req.query.pub) {
-            query = { "createdby.org_id": req.user.org_id, 'publish.status': true }
-            sort = { "publish.publish_date": -1 }
-        } else {
-            query = { "createdby.org_id": req.user.org_id, 'publish.status': false }
-            sort = { created_date: -1 }
-        }
+        let gq = new BatchesSearch(req)
+        let gqs = new BatchCertSort(req)
+        var query = gq.GenerateQuery()
+        var sort = gqs.GenerateSortQuery()
         if (isNaN(parseInt(pageno))) { pageno = 1 }
         var result = await batch.find(query).sort(sort).skip(pagination.Skip(pageno || 1, perpage)).limit(perpage);
         var total = await batch.find(query).countDocuments();
