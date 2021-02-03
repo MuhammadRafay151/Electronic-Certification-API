@@ -2,10 +2,11 @@ const express = require('express');
 var router = express.Router()
 const user = require('../models/user');
 const Auth = require('../Auth/Auth')
-var mongoose = require('mongoose');
 const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 const RFT = require('../models/tokens');
+const { ChangePasswordValidatior } = require("../Validations/validation")
+const { validationResult } = require('express-validator')
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ _id: req.params.orgid })
@@ -132,7 +133,7 @@ router.post('/login', async function (req, res) {
          }
          var token = await Auth.generateAccessToken(token_data)
          var RefreshToken = await Auth.generateRefreshToken(token_data)
-         await new RFT({ token: RefreshToken }).save()
+         await new RFT({ token: RefreshToken, userid: response._id }).save()
          delete response._doc.password
          response._doc.token = token
          response._doc.RefreshToken = RefreshToken
@@ -163,6 +164,7 @@ router.post('/refresh_token', async function (req, res) {
                var token = await Auth.generateAccessToken(token_data)
                res.json({ token })
             } else {
+               await RFT.deleteOne({ token: req.body.RefreshToken })
                res.status(403).json({ message: "Account has been disabled" })
             }
          } catch (err) {
@@ -230,5 +232,41 @@ router.get('/Available/:email', Auth.authenticateToken, Auth.CheckAuthorization(
       res.status(500).send()
    }
 })
-
+//
+router.put('/password', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),
+   ChangePasswordValidatior, async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+      let _new = req.body.new
+      let confirm = req.body.confirm
+      let current = req.body.current
+      if (confirm !== _new) { return res.status(409).send("password should be identical") }
+      try {
+         let result = await user.findOneAndUpdate({ _id: req.user.uid, password: current }, { password: _new })
+         if (result) {
+            await RFT.deleteMany({ userid: req.user.uid })
+            return res.status(200).send()
+         }
+         else {
+            return res.status(409).send("Invalid password")
+         }
+      }
+      catch (err) {
+         return res.status(500).send(err)
+      }
+   })
+// router.put('/resetpassword', async (req, res) => {
+//    let _new = req.body.new
+//    let confirm = req.body.confirm
+//    let reset_token = req.body.reset_token
+//    res.status(200).send()
+// })
+// router.get('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorization[Roles.SuperAdmin, Roles.Admin], async (req, res) => {
+//    let _new = req.body.new
+//    let confirm = req.body.confirm
+//    let reset_token = req.body.reset_token
+//    res.status(200).send()
+// })
 module.exports = router

@@ -41,7 +41,7 @@ class BatchCertSort extends Sort {
     GenerateSortQuery() {
         let sort = null
         if (this.pub) {
-            if (sort) {
+            if (this.sort) {
                 sort = this.sort === "asc" ? { "publish.publish_date": 1 } : { "publish.publish_date": -1 }
             } else {
                 sort = { "publish.publish_date": -1 }
