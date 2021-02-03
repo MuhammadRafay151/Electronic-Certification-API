@@ -201,8 +201,8 @@ app.get("/user/:id", (req, res) => {
 app.set('socketio', io);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-//mongoose.connect('mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to Mongo Atlas") })
-mongoose.connect('mongodb://localhost:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+mongoose.connect('mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to Mongo Atlas") })
+//mongoose.connect('mongodb://localhost:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
 server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")
