@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router()
-
 const auth = require('../Auth/Auth')
 const mail = require('../js/nodemailer')
 
