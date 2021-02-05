@@ -1,4 +1,3 @@
-const { response } = require('express');
 const express = require('express');
 const router = express.Router()
 const Auth = require('../Auth/Auth')
@@ -19,15 +18,16 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
             publish_date: Date.now()
         }
         if (req.app.get("BlockChain_Enable")) {
-            var temp = await cert.findOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false })
-            var BlockChainCert = await getblockchain_cert(temp, publish)
-            await invoke.IssueCertificate(BlockChainCert, req.user.uid)
+            await MsgBroker.send(true, { user: req.user, certid: req.body.id })
+            res.send("Processing started we will notify u soon")
         }
-        var crt = await cert.findOneAndUpdate({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
-        if (crt) {
-            res.status(200).send("Published successfully")
-        } else {
-            res.status(404).send()
+        else {
+            var crt = await cert.findOneAndUpdate({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
+            if (crt) {
+                res.status(200).send("Published successfully")
+            } else {
+                res.status(404).send()
+            }
         }
     } catch (err) {
         res.status(500).send()

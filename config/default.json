@@ -1,11 +1,14 @@
 {
-    "Org": {
-        "name": "Org1",
+   "Org": {        "name": "Org1",
         "mspId": "Org1MSP",
         "ca": "ca.org1.example.com"
     },
     "msgbroker": {
-        "url": "amqp://192.168.0.109:5672"
+        "url": "amqp://localhost:5672"
+    },
+    "database": {
+        "dev_url": "mongodb://localhost:27017/ecert",
+        "prod_url":"mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
     },
     "app": {
         "BlockChain_Enable": false

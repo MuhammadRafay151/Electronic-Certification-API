@@ -15,10 +15,12 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
 
     var u1 = await user.findById(req.user.uid)
     var logo = new files({
-        binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype
+        binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype,
+        type: "logo"
     })
     var signature = new files({
-        binary: req.files.signature[0].buffer, mimetype: req.files.signature[0].mimetype
+        binary: req.files.signature[0].buffer, mimetype: req.files.signature[0].mimetype,
+        type: "signature"
     })
     logo = await logo.save()
     signature = await signature.save()
@@ -118,7 +120,8 @@ router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin
 router.delete("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
 
-        var c = await cert.findOneAndDelete({ _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false })
+        let c = await cert.findOneAndDelete({ _id: req.params.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false })
+        await files.deleteMany({ _id: { $in: [c.logo._id, c.signature._id] } })
         console.log(req.user.name + "deleted")
         res.status(200).json({ message: "Deleted Sucessfully" })
     }
@@ -151,64 +154,4 @@ router.get("/org_pub/:org_id/:id?", auth.authenticateToken, auth.CheckAuthorizat
             res.status(404).send()
     }
 })
-function GenerateQuery(req) {
-    let query = {}
-    let dateprop = ""
-    if (req.query.pub) {
-        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-        dateprop = "publish.publish_date"
-    } else {
-        query = { 'issuedby.org_id': req.user.org_id, 'publish.status': false }
-        dateprop = "issue_date"
-    }
-    if (req.query.batch_name) {
-        query.name = { $regex: `.*${req.query.name}.*`, $options: 'i' }
-    }
-    if (req.query.title) {
-        query.title = { $regex: `.*${req.query.title}.*`, $options: 'i' }
-    }
-    if (req.query.fromdate && req.query.todate) {
-        let fromdate = new Date(req.query.fromdate)
-        fromdate.setHours(23, 59, 59, 999);
-        let todate = new Date(req.query.todate)
-        todate.setHours(0, 0, 0, 0);
-        query[dateprop] = {
-            $lte: new Date(fromdate),
-            $gte: new Date(todate)
-        }
-
-    } else if (req.query.fromdate) {
-        let fromdate = new Date(req.query.fromdate)
-        fromdate.setHours(23, 59, 59, 999);
-        query[dateprop] = {
-            $lte: new Date(fromdate),
-        }
-    } else if (req.query.todate) {
-        let todate = new Date(req.query.todate)
-        todate.setHours(0, 0, 0, 0);
-        query[dateprop] = {
-            $gte: new Date(todate)
-        }
-    }
-    return query
-}
-function GenerateSortQuery(req) {
-    let sort = null
-    if (req.query.pub) {
-        //  query = { 'issuedby.org_id': req.user.org_id, 'publish.status': true }
-        if (req.query.sort) {
-            sort = req.query.sort === "asc" ? { "publish.publish_date": 1 } : { "publish.publish_date": -1 }
-        } else {
-            sort = { "publish.publish_date": -1 }
-        }
-
-    } else {
-        if (req.query.sort) {
-            sort = req.query.sort === "asc" ? { issue_date: 1 } : { issue_date: -1 }
-        } else {
-            sort = { issue_date: -1 }
-        }
-    }
-    return sort
-}
 module.exports = router

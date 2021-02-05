@@ -27,11 +27,11 @@ const certificate = mongoose.Schema({
         type: String, required: false
     },
     logo: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
     signature: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
     issuedby: {
