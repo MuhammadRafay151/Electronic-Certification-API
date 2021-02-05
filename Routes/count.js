@@ -7,64 +7,57 @@ var pagination = require('./../js/pagination');
 const auth = require('../Auth/Auth')
 const Roles = require('../js/Roles')
 
-router.put('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    console.log(req.body)
-    var c1 = new count({
-        IsIncrease: true,
-        Count: req.body.count,
-        Org_Id: req.body.Org_Id,
-        by: {
-            name: req.user.name,
-            id: req.user.uid
-        }
-    })
+router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         //needs to be wrap in transaction 
-        var r1 = await organization.findByIdAndUpdate(req.body.Org_Id, {
+        var r1 = await organization.findOneAndUpdate({ _id: req.params.orgid }, {
             $inc: { ecertcount: parseInt(req.body.count) },
 
         }, { new: true })
 
-        var r2 = await c1.save()
-        res.json({org:r1,count:r2})
+        if (r1) {
+            var c1 = new count({
+                IsIncrease: true,
+                Count: req.body.count,
+                Org_Id: req.params.orgid,
+                date: Date.now(),
+                by: {
+                    name: req.user.name,
+                    id: req.user.uid
+                }
+            })
+            var r2 = await c1.save()
+            res.status(200).send("Count Incremented successfully")
+        }
+        else {
+            res.status(404).send()
+        }
+
     }
     catch (err) {
-        res.json(err)
+        res.status(500).send(err)
     }
 
 })
 
-router.get("/:id?", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    
-    if (req.params.id == null) {
-       
-        var perpage = 5
-        var pageno = req.query.pageno
-        if (isNaN(parseInt(pageno))) { pageno = 1 }
-        var result = await count.find(req.user.org_id, { },{ skip: pagination.Skip(pageno || 1, perpage), limit: perpage });
-        if (pageno == 1) {
-            var total = await count.find(req.user.org_id).countDocuments();
-            result = { "list": result, totalcount: total }
-        } else { result = { "list": result } }
-        res.json(result)
-    } else {
-        
-        var result = await count.find({ _id: req.params.id });
-        res.json(result)
-    }
+router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
+    var perpage = 5
+    var pageno = req.query.pageno
+    if (isNaN(parseInt(pageno))) { pageno = 1 }
+    var result = await count.find({ Org_Id: req.user.org_id }).sort({ date: -1 }).skip(pagination.Skip(pageno, perpage)).limit(perpage);
+    var total = await count.find({ Org_Id: req.user.org_id }).countDocuments();
+    result = { "list": result, totalcount: total }
+    res.json(result)
 })
+router.get('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
 
-router.get('/:id', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
-
-    try {
-
-        var r1 = await count.find({ Org_Id: req.params.id})
-        res.json(r1)
-
-    }
-    catch (err) {
-        res.json(err)
-    }
+    var perpage = 5
+    var pageno = req.query.pageno
+    if (isNaN(parseInt(pageno))) { pageno = 1 }
+    var result = await count.find({ Org_Id: req.params.id }).sort({ date: -1 }).skip(pagination.Skip(pageno, perpage)).limit(perpage);
+    var total = await count.find({ Org_Id: req.params.id }).countDocuments();
+    result = { "list": result, totalcount: total }
+    res.json(result)
 
 })
 

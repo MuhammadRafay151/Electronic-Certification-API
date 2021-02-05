@@ -3,8 +3,6 @@ const CertCount = mongoose.Schema({
 
     date: {
         type: Date,
-        default: Date.now()
-
     },
     IsIncrease: {
         type: Boolean,

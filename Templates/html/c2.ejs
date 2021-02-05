@@ -1,0 +1,116 @@
+<div class="container1 ">
+    <img
+      src="<%= img %>"
+      class="cert" alt="">
+    <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt="" class="logo" />
+  
+    <h3 class="t">
+      <%= data.title %>
+     
+    </h3>
+    <p class="desc ">
+      It is to certify that <b> <%= data.name%></b> <%= data.description %>
+    </p>
+    <p class="p2 ">
+     Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
+    
+    </p>
+    <p class="p3 ">
+      verfication code: <%=data._id %>
+    </p>
+    <div>
+      <p class="sign">Signature: _____________________</p>
+      
+      <img src="data:<%= data.signature.mimetype %>;base64,<%= data.signature.image %>" width="150" height="100" alt="" class="isign" />
+    </div>
+  
+  </div>
+  
+  </div>
+  <style>
+    .cert {
+      width: 29.7cm;
+      height: 21cm;
+    }
+  
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 900px;
+      object-fit: contain;
+    }
+  
+     .sign {
+      position: absolute;
+      top: 730px;
+      left: 840px;
+      color: black;
+    }
+  
+    .isign {
+      position: absolute;
+      top: 650px;
+      left: 915px;
+      object-fit: contain;
+  
+    }
+    .t {
+      position: absolute;
+      top: 160px;
+      color: black;
+      left: 0;
+      right: 0;
+  
+      height: 500px;
+      /* Assign a value */
+      margin: auto;
+    }
+  
+    .container1 {
+      position: relative;
+      text-align: center;
+      color: white;
+      width: 29.7cm;
+      height: 21cm;
+    }
+  
+    .scroll {
+      width: 842px;
+      overflow-x: scroll;
+      overflow-y: hidden;
+    }
+  
+    .desc {
+      position: absolute;
+      top: 210px;
+      color: black;
+      left: 0;
+      right: 0;
+  
+      width: 600px;
+      margin: auto;
+    }
+  
+    .p2 {
+      position: absolute;
+      top: 700px;
+      color: black;
+      left: 30px;
+  
+    }
+  
+    .p3 {
+      position: absolute;
+      top: 730px;
+      color: black;
+      left: 30px;
+    }
+    @media print {
+  
+  html, body {
+    height:100vh; 
+    margin: 0 !important; 
+    padding: 0 !important;
+    overflow: hidden;
+  }}
+  </style>

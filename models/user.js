@@ -6,7 +6,7 @@ const User = mongoose.Schema({
     },
     email: {
         type: String,
-        unique:true,
+        unique: true,
         index: true,
         required: true
     },
@@ -14,17 +14,26 @@ const User = mongoose.Schema({
         type: String,
         required: true
     },
-    organization:{
-        name:{type:String,required:true},
-        id:{type:String,required:true}
+    organization: {
+        name: { type: String },
+        id: { type: String },
+
     },
-    roles:[],
-    status:{
-       active:{type:Boolean,default:true},
-        
-    }
+    roles: [],
+    status: {
+        active: { type: Boolean, default: true },
 
-
+    },
+    register_date: { type: Date },
+    phone: {
+        type: String,
+    },
+    country_code: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
 })
 
 module.exports = mongoose.model("User", User)

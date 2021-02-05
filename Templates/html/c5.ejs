@@ -1,0 +1,138 @@
+<div class="container1 ">
+    <img src="<%= img %>" class="cert" alt="">
+    <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt=""
+        class="logo" />
+
+    <h3 class="t">
+        <%= data.title %>
+    </h3>
+
+    <p class="desc ">
+        It is to certify that <br>
+        <b style="font-size: 35px; color: black;"> <%= data.name%></b> <br>
+        <%= data.description %>
+    </p>
+
+    <p class="p2 ">
+        Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
+
+    </p>
+
+    <p class="p3 ">
+        verfication code: <%=data._id %>
+    </p>
+
+    <div>
+        <p class="sign">Signature: _____________________</p>
+
+        <img src="data:<%= data.signature.mimetype %>;base64,<%= data.signature.image %>" width="150"
+            height="100" alt="" class="isign" />
+    </div>
+</div>
+
+<style>
+    .cert {
+        width: 29.7cm;
+        height: 21cm;
+    }
+
+    .logo {
+        position: absolute;
+        top: 85.666px;
+        left: 22.204cm;
+        object-fit: contain;
+    }
+
+    .t {
+        position: absolute;
+        top: 70px;
+        color: #66c8d0;;
+        left: 1cm;
+        right: 1cm;
+        width: 18cm;
+        /* Assign a value */
+        margin:0%;
+        font-family: 'Kano regular';
+        font-size: 50px;
+        text-transform: uppercase;
+        text-align: justify;
+    }
+
+    .desc {
+        position: absolute;
+        top: 300px;
+        color: #999999;
+        left: 1cm;
+        right: 1cm;
+        width: 18cm;
+        margin: 0%;
+        font-family: 'Kano regular';
+        font-size: 20px;
+        text-align: justify;
+    }
+
+    .p2 {
+        position: absolute;
+        top: 690px;
+        color: black;
+        left: 1cm;
+        margin: 0%;
+        font-family: 'Kano regular';
+        font-size: 15px;
+    }
+
+    .p3 {
+        position: absolute;
+        top: 720px;
+        color: black;
+        left: 1cm;
+        margin: 0%;
+        font-family: 'Kano regular';
+        font-size: 15px;
+    }
+
+    .sign {
+        position: absolute;
+        top: 720px;
+        right: 1cm;
+        color: black;
+        margin: 0%;
+        font-family: 'Kano regular';
+        font-size: 15px;
+    }
+
+    .isign {
+        position: absolute;
+        top: 650px;
+        right: 1.06cm;
+        object-fit: contain;
+
+    }
+
+    .container1 {
+        position: relative;
+        text-align: center;
+        color: white;
+        width: 29.7cm;
+        height: 21cm;
+
+    }
+
+    @media print {
+
+        html,
+        body {
+            height: 100vh;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+    }
+
+    .scroll {
+        width: 842px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+</style>

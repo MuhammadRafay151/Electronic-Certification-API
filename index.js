@@ -1,5 +1,8 @@
 const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
 var cors = require('cors')
+const config = require('config');
 const helper = require('./BlockChain/helper');
 const Invoke = require('./BlockChain/invoke');
 const certificate = require('./Routes/Certificate');
@@ -9,15 +12,18 @@ const organization = require('./Routes/Organization');
 // const query = require('./query');
 const { authenticateToken, generateAccessToken } = require('./Auth/Auth');
 const account = require("./Routes/Account");
+const users = require("./Routes/Users")
 const mongoose = require('mongoose');
 const count = require('./Routes/count')
 const mail = require('./Routes/mail')
 const download = require('./Routes/downloadpdf')
 const image = require('./Routes/Image')
 const publish = require('./Routes/Publish')
+const verify = require('./Routes/verify')
+const dashboard = require('./Routes/DashBoard')
 const fs = require('fs').promises;
 var multer = require('multer');
-const { type } = require('os');
+const Auth = require('./Auth/Auth');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -28,20 +34,19 @@ var storage = multer.diskStorage({
   }
 })
 var upload = multer({ storage: storage })
-/**
- * App Variables
- */
-
-const app = express();
-app.use(express.json());
-app.use(cors())
+const { fork } = require('child_process');
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }
+});
 const port = process.env.PORT || "8000";
 const userorg = "Org1";
 require('dotenv').config();
-/**
- * Routes Definitions
- */
+app.use(express.json());
+app.use(cors())
 app.use("/api/account", account)
+app.use("/api/users", users)
 app.use("/api/certificate", certificate)
 app.use("/api/batch", batch)
 app.use("/api/bcert", bcerts)
@@ -50,11 +55,37 @@ app.use("/api/count", count)
 app.use("/api/organization", organization)
 app.use("/download", download)
 app.use("/api/publish", publish)
+app.use("/api/verify", verify)
+app.use("/api/dashboard", dashboard)
 app.use("/image", image)
+//app config loading
+const app_config = config.get("app")
+app.set("BlockChain_Enable", app_config.BlockChain_Enable)
 
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.connect('mongodb://127.0.0.1:27017/ecert', { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+//Socket Connection
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  Auth.AuthenticateSocket(token, socket, next)
+  // console.log(token)
+});
+io.on('connection', socket => {
+  socket.join(socket.user.org_id);
+  socket.emit('message', "welcome u are connected");
+  socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
+  socket.on('close', () => {
+    socket.disconnect()
+  })
+});
+// Rabitmq consumer
+if (app.get("BlockChain_Enable")) {
+  const fk = fork('./MessageBroker/SingleConsumer.js')
+  fk.on('message', obj => {
+    //io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
+    console.log("published")
+  });
+}
+
+//test file upload
 var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 app.post('/test', cpUpload, async (req, res) => {
   // var x = req.files
@@ -68,7 +99,6 @@ app.post('/test', cpUpload, async (req, res) => {
   console.log(typeof (1))
   res.json({ x: x })
 })
-
 // ---------------------------------------------dont  modify it----------------------------------------------------
 app.get("/api/RegisterUser", async function (req, res) {
 
@@ -141,7 +171,7 @@ app.post('/api/IssueCertificate', async function (req, res) {
     id: req.body.id
   }
   try {
-  var response = await Invoke.IssueCertificate(c1, "a1");
+    var response = await Invoke.IssueCertificate(c1, "a1");
     c1.message = "Transaction Successful..."
     res.status(200).json(c1);
   } catch (err) {
@@ -161,16 +191,22 @@ app.get('/api/VerifyCertificate/:id', async function (req, res) {
   }
 })
 app.get("/", (req, res) => {
-  res.status(200).send("Welcome to HyperLedgerFabric <br/>Apne bs Ghabarana nhi hy baqe sab khir hy <br/>Halwa hy bey...");
+  res.status(200).send("Welcome to Certifis <br/>Create digitally verified certificates<br/>Enjoy!");
 });
-
+app.get("/home/wel", (req, res) => {
+  res.status(200).send("Welcome to Certifis <br/>Create digitally verified certificates<br/>Enjoy!");
+});
 app.get("/user/:id", (req, res) => {
   res.status(200).send(req.params.id);
 });
 
-app.listen(port, () => {
-  console.log(`Listening to requests on http://localhost:${port}`);
+app.set('socketio', io);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.connect(config.get('database.prod_url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to Mongo Atlas") })
+//mongoose.connect(config.get('database.dev_url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+server.listen(port, () => {
+  console.log(`Listening to requests on http://localhost:${port}`)
+  console.log("socket server connected")
 });
-
-
-
+//  require('crypto').randomBytes(64).toString('hex')

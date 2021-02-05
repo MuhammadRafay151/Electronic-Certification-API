@@ -25,12 +25,12 @@ const batch = mongoose.Schema({
         required: false
     },
     logo: {
-        image: { type: String, required: true },
-        mimetype: { type: String, required: true }
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     },
     signature: {
-        image: { type: String, required: true },
-        mimetype: { type: String, required: true }
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     },
     template_id: {
         type: String,

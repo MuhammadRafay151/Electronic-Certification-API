@@ -3,7 +3,7 @@ const Image = require('../js/Image')
 async function GetBlockChainCert(crt, publish) {
     var pdf_base64 = await cert_pdf.GetPdf_Base64(crt)
     var BlockChainCert = {
-        id: crt._id,
+        _id: crt._id,
         name: crt.name,
         title: crt.title,
         expiry_date: crt.expiry_date,
@@ -15,19 +15,19 @@ async function GetBlockChainCert(crt, publish) {
         pdf: pdf_base64,
         docType: "ecert",
     }
+    //should add organization data in the object also the parent organization refrence as well
     return BlockChainCert
 }
-function ProcessBatchCerts(batch, batchcerts, publish) {
+async function ProcessBatchCerts(batch, batchcerts, publish) {
     certs = []
-    var LogoBase64 = await Image.GetImgBase64(batch.logo.image)
-    var SignatureBase64 = await Image.GetImgBase64(batch.signature.image)
+    var path = "./uploads/"
+    batch.logo.image = await Image.GetImgBase64(path + batch.logo.image)
+    batch.signature.image = await Image.GetImgBase64(path + batch.signature.image)
     for (var i = 0; i < batchcerts.length; i++) {
         var crt = Object.assign({}, batch)
         crt.name = batchcerts[i].name
         crt.email = batchcerts[i].email
-        crt.logo.image = LogoBase64
-        crt.signature.image = SignatureBase64
-        crt = GetBlockChainCert(crt, publish)
+        crt = await GetBlockChainCert(crt, publish)
         certs.push(crt)
     }
     return certs
