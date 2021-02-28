@@ -51,10 +51,12 @@ var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature'
 router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
     var u1 = await user.findById(req.user.uid)
     var logo = new files({
-        binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype
+        binary: req.files.logo[0].buffer, mimetype: req.files.logo[0].mimetype,
+        type: "logo"
     })
     var signature = new files({
-        binary: req.files.signature[0].buffer, mimetype: req.files.signature[0].mimetype
+        binary: req.files.signature[0].buffer, mimetype: req.files.signature[0].mimetype,
+        type: "signature"
     })
     logo = await logo.save()
     signature = await signature.save()

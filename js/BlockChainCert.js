@@ -11,6 +11,7 @@ async function GetBlockChainCert(crt, publish) {
         template_id: crt.template_id,
         publish: publish,
         logo: crt.logo,
+        description: crt.description,
         signature: crt.signature,
         pdf: pdf_base64,
         docType: "ecert",
@@ -20,11 +21,9 @@ async function GetBlockChainCert(crt, publish) {
 }
 async function ProcessBatchCerts(batch, batchcerts, publish) {
     certs = []
-    var path = "./uploads/"
-    batch.logo.image = await Image.GetImgBase64(path + batch.logo.image)
-    batch.signature.image = await Image.GetImgBase64(path + batch.signature.image)
-    for (var i = 0; i < batchcerts.length; i++) {
-        var crt = Object.assign({}, batch)
+    for (let i = 0; i < batchcerts.length; i++) {
+        let crt = Object.assign({}, batch)
+        crt._id = batchcerts[i]._id
         crt.name = batchcerts[i].name
         crt.email = batchcerts[i].email
         crt = await GetBlockChainCert(crt, publish)

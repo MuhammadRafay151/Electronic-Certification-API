@@ -52,10 +52,10 @@ class SingleSearch extends search {
         let query = {}
 
         if (this.pub) {
-            query = { 'issuedby.org_id': this.uid, 'publish.status': true }
+            query = { 'issuedby.org_id': this.uid, 'publish.status': true, 'publish.processing': false }
             this.dateprop = "publish.publish_date"
         } else {
-            query = { 'issuedby.org_id': this.uid, 'publish.status': false }
+            query = { 'issuedby.org_id': this.uid, 'publish.status': false, 'publish.processing': false }
             this.dateprop = "issue_date"
         }
         if (this.name) {
@@ -77,10 +77,10 @@ class BatchesSearch extends search {
         let query = {}
         let dateprop = ""
         if (this.pub) {
-            query = { 'createdby.org_id': this.uid, 'publish.status': true }
+            query = { 'createdby.org_id': this.uid, 'publish.status': true, 'publish.processing': false }
             dateprop = "publish.publish_date"
         } else {
-            query = { 'createdby.org_id': this.uid, 'publish.status': false }
+            query = { 'createdby.org_id': this.uid, 'publish.status': false, 'publish.processing': false }
             dateprop = "created_date"
         }
         if (this.batch_name) {

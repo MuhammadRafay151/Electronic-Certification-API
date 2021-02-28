@@ -18,7 +18,11 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
             publish_date: Date.now()
         }
         if (req.app.get("BlockChain_Enable")) {
-            await MsgBroker.send(true, { user: req.user, certid: req.body.id })
+            let ct = await cert.updateOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } })
+            if (ct.nModified === 1) {
+                await MsgBroker.send(true, { user: req.user, certid: req.body.id })
+
+            }
             res.send("Processing started we will notify u soon")
         }
         else {
@@ -40,8 +44,13 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
             var bcert = await batch_cert.find({ batch_id: req.body.id }).countDocuments()
             if (bcert && bcert > 1) {
                 if (req.app.get("BlockChain_Enable")) {
-                    await MsgBroker.send({ user: req.user, batchid: req.body.id })
-                    res.send("Processing started we will notify u soon")
+                    let bt = await batch.updateOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } })
+                    if (bt.nModified === 1) {
+                        await MsgBroker.send(false, { user: req.user, batchid: req.body.id })
+                        res.send("Processing started we will notify u soon")
+                    }
+                    else
+                        res.status(404).send()
                 } else {
                     var publish = {
                         status: true,

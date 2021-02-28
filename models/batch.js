@@ -63,6 +63,7 @@ const batch = mongoose.Schema({
     ],
     publish: {
         status: { type: Boolean, default: false },
+        processing: { type: Boolean, default: false },
         publisher_name: { type: String },
         publisher_email: { type: String },
         publish_date: { type: Date }

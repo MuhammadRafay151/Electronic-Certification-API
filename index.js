@@ -21,6 +21,7 @@ const image = require('./Routes/Image')
 const publish = require('./Routes/Publish')
 const verify = require('./Routes/verify')
 const dashboard = require('./Routes/DashBoard')
+const report = require("./Routes/Report")
 const fs = require('fs').promises;
 var multer = require('multer');
 const Auth = require('./Auth/Auth');
@@ -57,6 +58,7 @@ app.use("/download", download)
 app.use("/api/publish", publish)
 app.use("/api/verify", verify)
 app.use("/api/dashboard", dashboard)
+app.use("/api/report", report)
 app.use("/image", image)
 //app config loading
 const app_config = config.get("app")
@@ -78,10 +80,15 @@ io.on('connection', socket => {
 });
 // Rabitmq consumer
 if (app.get("BlockChain_Enable")) {
-  const fk = fork('./MessageBroker/SingleConsumer.js')
-  fk.on('message', obj => {
+  const sc = fork('./MessageBroker/SingleConsumer.js')
+  const bc = fork('./MessageBroker/BatchConsumer.js')
+  sc.on('message', obj => {
     //io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
-    console.log("published")
+    console.log("single published")
+  });
+  bc.on('message', obj => {
+    //io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
+    console.log("batch published")
   });
 }
 
@@ -203,8 +210,7 @@ app.get("/user/:id", (req, res) => {
 app.set('socketio', io);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-mongoose.connect(config.get('database.prod_url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to Mongo Atlas") })
-//mongoose.connect(config.get('database.dev_url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
 server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")
