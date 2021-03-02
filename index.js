@@ -65,17 +65,22 @@ const app_config = config.get("app")
 app.set("BlockChain_Enable", app_config.BlockChain_Enable)
 
 //Socket Connection
+const SocketMap = {}
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   Auth.AuthenticateSocket(token, socket, next)
   // console.log(token)
 });
 io.on('connection', socket => {
-  socket.join(socket.user.org_id);
-  socket.emit('message', "welcome u are connected");
-  socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
+  SocketMap[socket.user.uid] = socket.id
+  // socket.join(socket.user.org_id);
+  // socket.emit('message', "welcome u are connected");
+  // socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
   socket.on('close', () => {
     socket.disconnect()
+  })
+  socket.on('disconnect', () => {
+    delete SocketMap[socket.user.uid]
   })
 });
 // Rabitmq consumer
@@ -208,6 +213,7 @@ app.get("/user/:id", (req, res) => {
 });
 
 app.set('socketio', io);
+app.set('SocketMap', SocketMap);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
