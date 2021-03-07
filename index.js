@@ -74,7 +74,7 @@ io.use((socket, next) => {
 io.on('connection', socket => {
   SocketMap[socket.user.uid] = socket.id
   // socket.join(socket.user.org_id);
-  // socket.emit('message', "welcome u are connected");
+  socket.emit('message', "welcome u are connected");
   // socket.to(socket.user.org_id).emit('message', `${socket.user.name} is just logged in`);
   socket.on('close', () => {
     socket.disconnect()
@@ -88,11 +88,25 @@ if (app.get("BlockChain_Enable")) {
   const sc = fork('./MessageBroker/SingleConsumer.js')
   const bc = fork('./MessageBroker/BatchConsumer.js')
   sc.on('message', obj => {
-    //io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
+    let UserSocketId = SocketMap[obj.user.uid]
+    if (UserSocketId) {
+      if (obj.IsSuccess)
+        io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  has been published`);
+      else
+        io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  failed to publish due to unkonwn error please try after some time`);
+
+    }
+    console.log(obj)
     console.log("single published")
   });
   bc.on('message', obj => {
-    //io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${obj.batchid} batch`);
+    let UserSocketId = SocketMap[obj.user.uid]
+    if (UserSocketId) {
+      if (obj.IsSuccess)
+        io.sockets.to(UserSocketId).emit("message", `batch with id ${obj.batchid} has been published`);
+      else
+        io.sockets.to(UserSocketId).emit("message", `batch with id ${obj.batchid} failed to publish due to unkonwn error please try after some time`);
+    }
     console.log("batch published")
   });
 }

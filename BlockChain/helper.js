@@ -8,7 +8,7 @@ const config = require('config');
 const org = { name: config.get("Org.name"), mspId: config.get('Org.mspId') }
 const getCCP = async () => {
     let ccpPath;
-    ccpPath = path.resolve(__dirname,'..', 'config', 'connection-org1.json');
+    ccpPath = path.resolve(__dirname, '..', 'config', 'connection-org1.json');
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8')
     const ccp = JSON.parse(ccpJSON);
     return ccp
@@ -58,15 +58,8 @@ const getRegisteredUser = async (username, password) => {
     // build a user object for authenticating with the CA
     const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
     const adminUser = await provider.getUserContext(adminIdentity, 'admin');
-    let secret;
-    try {
-        // Register the user, enroll the user, and import the new identity into the wallet.
-        secret = await ca.register({ affiliation: await getAffiliation(), enrollmentID: username, enrollmentSecret: password, role: 'client' }, adminUser);
-        // const secret = await ca.register({ affiliation: 'org1.department1', enrollmentID: username, role: 'client', attrs: [{ name: 'role', value: 'approver', ecert: true }] }, adminUser);
-
-    } catch (error) {
-        return error.message
-    }
+    console.log(provider, adminUser)
+    let secret = await ca.register({ affiliation: await getAffiliation(), enrollmentID: username, enrollmentSecret: password, role: 'client' }, adminUser);
     console.log("Password " + secret);
     const enrollment = await ca.enroll({ enrollmentID: username, enrollmentSecret: secret });
     // const enrollment = await ca.enroll({ enrollmentID: username, enrollmentSecret: secret, attr_reqs: [{ name: 'role', optional: false }] });

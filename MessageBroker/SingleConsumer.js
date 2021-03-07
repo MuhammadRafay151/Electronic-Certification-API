@@ -15,10 +15,15 @@ async function SingleConsumer() {
         await channel.assertQueue("single");
         await channel.consume("single", async msg => {
             let obj = JSON.parse(msg.content.toString())
-            await pub.PublishSingle(obj)
-            process.send(obj);
-            channel.ack(msg)
+            let IsSuccess = await pub.PublishSingle(obj)
+            if (IsSuccess) {
+                process.send({ ...obj, IsSuccess });
+                channel.ack(msg)
 
+            } else {
+                process.send({ ...obj, IsSuccess });
+                channel.ack(msg)
+            }
         })
     }
     catch (ex) {

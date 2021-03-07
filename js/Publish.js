@@ -4,7 +4,6 @@ const batch = require('../models/batch')
 const cert = require('../models/certificate')
 const files = require('../models/files')
 const { singleInvoke, batchInvoke } = require('../BlockChain/invoke')
-const { set } = require('mongoose')
 async function PublishBatch(obj) {
     try {
         let publish = {
@@ -23,6 +22,7 @@ async function PublishBatch(obj) {
         let CryptoCert = await BlockChainCert.ProcessBatchCerts(bt, bcert, publish)
         await batchInvoke(CryptoCert, obj.user.uid)
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
+        return true
         // let st = JSON.stringify(CryptoCert)
         // let te=JSON.parse(st)
         // console.log(te[0]._id)
@@ -35,6 +35,7 @@ async function PublishBatch(obj) {
     catch (err) {
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': true } })
         console.log(err)
+        return false
     }
 
 }
@@ -60,10 +61,12 @@ async function PublishSingle(obj) {
         //     if (err) return console.log(err);
         //     console.log('Hello World > helloworld.txt');
         // });
+        return true
     }
     catch (err) {
         await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
         console.log(err)
+        return false
     }
 
 }

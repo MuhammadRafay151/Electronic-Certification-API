@@ -15,9 +15,15 @@ async function BatchConsumer() {
         await channel.assertQueue("batch");
         await channel.consume("batch", async msg => {
             let obj = JSON.parse(msg.content.toString())
-            await pub.PublishBatch(obj)
-            process.send(obj);
-            channel.ack(msg)
+            let IsSuccess = await pub.PublishBatch(obj)
+            if (IsSuccess) {
+                process.send({ ...obj, IsSuccess });
+                channel.ack(msg)
+
+            } else {
+                process.send({ ...obj, IsSuccess });
+                channel.ack(msg)
+            }
 
         })
     }
