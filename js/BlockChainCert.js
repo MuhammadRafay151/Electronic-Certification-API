@@ -5,6 +5,7 @@ async function GetBlockChainCert(crt, publish) {
     var BlockChainCert = {
         _id: crt._id,
         name: crt.name,
+        email:crt.email,
         title: crt.title,
         expiry_date: crt.expiry_date,
         instructor_name: crt.instructor_name,

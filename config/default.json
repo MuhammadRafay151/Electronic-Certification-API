@@ -1,5 +1,6 @@
 {
-   "Org": {        "name": "Org1",
+    "Org": {
+        "name": "Org1",
         "mspId": "Org1MSP",
         "ca": "ca.org1.example.com"
     },
@@ -8,7 +9,7 @@
     },
     "database": {
         "devurl": "mongodb://localhost:27017/ecert",
-        "url":"mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
+        "url": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
     },
     "app": {
         "BlockChain_Enable": false
