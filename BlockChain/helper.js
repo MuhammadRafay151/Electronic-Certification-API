@@ -5,7 +5,7 @@ const FabricCAServices = require('fabric-ca-client');
 const fs = require('fs');
 const util = require('util');
 const config = require('config');
-const org = { name: config.get("Org.name"), mspId: config.get('Org.mspId') }
+const org = { name: config.get("org.name"), mspId: config.get('org.mspId') }
 const getCCP = async () => {
     let ccpPath;
     ccpPath = path.resolve(__dirname, '..', 'config', 'connection-org1.json');

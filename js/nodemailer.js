@@ -1,11 +1,15 @@
 var nodemailer = require('nodemailer');
 
-var transporter = nodemailer.createTransport({
+async function SendMail(body) {
+  console.log(body)
+  let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: 'certifis.cf@gmail.com',
       pass: 'certifis@123'
     }
   });
-
-  module.exports={transporter:transporter}
+  let result = await transporter.sendMail(body);
+  return result;
+}
+module.exports = { SendMail }

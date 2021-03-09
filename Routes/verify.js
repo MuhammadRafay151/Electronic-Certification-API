@@ -5,6 +5,8 @@ const batch_cert = require('../models/batch_certificates')
 const cert = require('../models/certificate');
 const mongoose = require("mongoose");
 const { GetCertificate } = require("../BlockChain/query")
+const { SendMail } = require("../js/nodemailer")
+const config = require("config")
 router.get('/:id', async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id))
@@ -41,6 +43,15 @@ router.get('/:id', async (req, res) => {
             result.is_expired = false
             result.message = "The Certificate is verfied"
         }
+        let x = await SendMail(
+            {
+                from: `${config.get("org.name")} <certifis.cf@gmail.com>`,
+                to: 'muhammadrafay151@gmail.com',
+                subject: 'Certificate Verification',
+                text: `Your ${result.title} certificate is verfied from the ${config.get("org.name")} Servers`
+            }
+        )
+        console.log(x)
         res.json(result)
     }
     catch (err) {
