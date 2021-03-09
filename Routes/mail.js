@@ -1,26 +1,36 @@
 const express = require('express');
 const router = express.Router()
 const auth = require('../Auth/Auth')
-// const mail = require('../js/nodemailer')
+const role = require('../js/Roles')
+const cert = require('../models/certificate')
+const { SendMail } = require('../js/nodemailer')
+const config = require("config")
+router.post('/single/:id', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
 
-router.post('/', auth.authenticateToken, auth.CheckAuthorization(["SuperAdmin"]), async (req, res) => {
-    
-    //{
-    //    from: 'NED <certifis.cf@gmail.com>',
-    //    to: 'muhammadrafay151@gmail.com',
-    //    subject: 'Succesfully Registered',
-    //    text: 'You have been succesfully Registered under NED in Certifis Block chain'
-    //}
-    res.send()
+    try {
+        let result = await cert.findOne({ _id: req.params.id })
+        let link = config.get("app.verification_url")
+        await SendMail(
+            {
+                from: `${result.issuedby.org_name} <certifis.cf@gmail.com>`,
+                to: result.email,
+                subject: `${result.title} Certificate`,
+                text: `Dear ${result.name} your certificate has been published you cann access it using the following link ${link}${result._id}`
+            }
+        )
+        res.status(204).send("email sended successfully")
+    } catch (err) {
+        res.status(500).send("server error")
+    }
 
-//     mail.transporter.sendMail(req.body, function(error, info){
-//     if (error) {
-//           //console.log(error);
-//           res.json(error)
-//     } else {
-//           //console.log('Email sent: ' + info.response);
-//           res.json('Email sent: ' + info.response)
-//     }
+})
+router.post('/batchcert', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
+
+
+
+})
+router.post('/batch', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
+
 
 
 })

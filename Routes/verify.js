@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const { GetCertificate } = require("../BlockChain/query")
 const { SendMail } = require("../js/nodemailer")
 const config = require("config")
+
 router.get('/:id', async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id))
