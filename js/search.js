@@ -20,25 +20,25 @@ class search {
     GenrateDateQuery(query) {
         if (this.fromdate && this.todate) {
             this.fromdate = new Date(this.fromdate)
-            this.fromdate.setHours(23, 59, 59, 999);
+            this.fromdate.setHours(0, 0, 0, 0);
             this.todate = new Date(this.todate)
-            this.todate.setHours(0, 0, 0, 0);
+            this.todate.setHours(23, 59, 59, 999);
             query[this.dateprop] = {
-                $lte: new Date(this.fromdate),
-                $gte: new Date(this.todate)
+                $gte: new Date(this.fromdate),
+                $lte: new Date(this.todate)
             }
 
         } else if (this.fromdate) {
             this.fromdate = new Date(this.fromdate)
-            this.fromdate.setHours(23, 59, 59, 999);
+            this.fromdate.setHours(0, 0, 0, 0);
             query[this.dateprop] = {
-                $lte: new Date(this.fromdate),
+                $gte: new Date(this.fromdate),
             }
         } else if (this.todate) {
             this.todate = new Date(this.todate)
-            this.todate.setHours(0, 0, 0, 0);
+            this.todate.setHours(23, 59, 59, 999);
             query[this.dateprop] = {
-                $gte: new Date(this.todate)
+                $lte: new Date(this.todate)
             }
         }
     }
