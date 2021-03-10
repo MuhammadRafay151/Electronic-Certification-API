@@ -9,8 +9,8 @@
         "url": "amqp://192.168.0.107:5672"
     },
     "database": {
-        "devurl": "mongodb://localhost:27017/ecert",
-        "url": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
+        "url": "mongodb://localhost:27017/ecert",
+        "devurl": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
     },
     "email": {
         "user": "certifis.cf@gmail.com",
@@ -18,6 +18,6 @@
     },
     "app": {
         "BlockChain_Enable": false,
-        "verification_url": "http://localhost:8080/api/verify/"
+        "verification_url": "http://localhost:8080/verification/"
     }
 }

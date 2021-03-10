@@ -15,7 +15,7 @@ router.post('/single/:id', auth.authenticateToken, auth.CheckAuthorization([role
                 from: `${result.issuedby.org_name} <certifis.cf@gmail.com>`,
                 to: result.email,
                 subject: `${result.title} Certificate`,
-                text: `Dear ${result.name} your certificate has been published you cann access it using the following link ${link}${result._id}`
+                text: `Dear ${result.name}  you can access your digital certificate using the following link ${link}${result._id}`
             }
         )
         res.status(204).send("email sended successfully")

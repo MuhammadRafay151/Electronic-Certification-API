@@ -15,7 +15,8 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
             status: true,
             publisher_name: req.user.name,
             publisher_email: req.user.email,
-            publish_date: Date.now()
+            publish_date: Date.now(),
+            processing: false
         }
         if (req.app.get("BlockChain_Enable")) {
             let ct = await cert.updateOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } })
@@ -56,7 +57,8 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
                         status: true,
                         publisher_name: req.user.name,
                         publisher_email: req.user.email,
-                        publish_date: Date.now()
+                        publish_date: Date.now(),
+                        processing: false
                     }
                     var bt = await batch.updateOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
                     res.send("Batch Published...")
@@ -72,20 +74,5 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
         res.status(500).send(err)
     }
 })
-async function getblockchain_cert(crt, publish) {
-    var pdf_base64 = await cert_pdf.GetPdf_Base64(crt)
-    var BlockChainCert = {
-        id: crt._id,
-        name: crt.name,
-        title: crt.title,
-        expiry_date: crt.expiry_date,
-        instructor_name: crt.instructor_name,
-        template_id: crt.template_id,
-        publish: publish,
-        pdf: pdf_base64,
-        docType: "ecert",
-    }
 
-    return BlockChainCert
-}
 module.exports = router
