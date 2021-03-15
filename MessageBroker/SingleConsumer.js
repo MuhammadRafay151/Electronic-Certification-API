@@ -14,7 +14,14 @@ async function SingleConsumer() {
         channel.prefetch(1)//max number of unacknowledged deliveries for process  at a time
         await channel.assertQueue("single");
         await channel.consume("single", async msg => {
+
             let obj = JSON.parse(msg.content.toString())
+            if (config.get("app.debugging") === true) {
+                let temp = { ...obj, message: "recieved in single consumer", debugging: true };
+                temp._id = temp.certid;
+                delete temp.certid;
+                process.send(temp);
+            }
             let IsSuccess = await pub.PublishSingle(obj)
             if (IsSuccess) {
                 process.send({ ...obj, IsSuccess });

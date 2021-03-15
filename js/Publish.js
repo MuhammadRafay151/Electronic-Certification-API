@@ -4,6 +4,7 @@ const batch = require('../models/batch')
 const cert = require('../models/certificate')
 const files = require('../models/files')
 const { singleInvoke, batchInvoke } = require('../BlockChain/invoke')
+const config = require('config')
 async function PublishBatch(obj) {
     try {
         let publish = {
@@ -53,15 +54,25 @@ async function PublishSingle(obj) {
         let signature = fl.find(obj => obj.type === "signature")
         crt.logo = { image: Buffer.from(logo.binary.buffer).toString('base64'), mimetype: logo.mimetype }
         crt.signature = { image: Buffer.from(signature.binary.buffer).toString('base64'), mimetype: signature.mimetype }
+       
         let CryptoCert = await BlockChainCert.GetBlockChainCert(crt, publish)
+        if (config.get("app.debugging") === true) {
+            let temp = { ...CryptoCert, message: "Final certificate", debugging: true };
+            process.send(temp);
+            process.send({ _id: crt._id, message: "Sending to blockchain", debugging: true });
+        }
         await singleInvoke(CryptoCert, obj.user.uid)
         await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
+        if (config.get("app.debugging") === true) {
+            let temp = { _id: crt._id, message: "Successfully published on blockchain", debugging: true };
+            process.send(temp);
+        }
         // let fs = require('fs');
         // fs.writeFile('single.pdf', Buffer.from(CryptoCert.pdf,'base64'), function (err) {
         //     if (err) return console.log(err);
         //     console.log('Hello World > helloworld.txt');
         // });
-        return true
+        return true;
     }
     catch (err) {
         await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })

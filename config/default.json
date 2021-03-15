@@ -17,7 +17,9 @@
         "pass": "certifis@123"
     },
     "app": {
-        "BlockChain_Enable": false,
-        "verification_url": "http://localhost:8080/verification/"
+        "BlockChain_Enable": true,
+        "verification_url": "http://localhost:8080/verification/",
+        "debugging": true,
+        "TokenExpiry":"2h"
     }
 }

@@ -25,6 +25,7 @@ const report = require("./Routes/Report")
 const fs = require('fs').promises;
 var multer = require('multer');
 const Auth = require('./Auth/Auth');
+const socketEmit = require('./js/socketEmit')
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -36,6 +37,7 @@ var storage = multer.diskStorage({
 })
 var upload = multer({ storage: storage })
 const { fork } = require('child_process');
+
 const io = require('socket.io')(server, {
   cors: {
     origin: '*',
@@ -62,6 +64,8 @@ app.use("/api/report", report)
 app.use("/image", image)
 //app config loading
 const app_config = config.get("app")
+const debugging = config.get("app.debugging")
+
 app.set("BlockChain_Enable", app_config.BlockChain_Enable)
 
 //Socket Connection
@@ -79,6 +83,16 @@ io.on('connection', socket => {
   socket.on('close', () => {
     socket.disconnect()
   })
+  socket.on('join_debugging', () => {
+    socket.join("debugging");
+    socket.emit('message', "you are connected with debugging room");
+    io.to("debugging").emit("log", { id: "as", msg: "Listening to logs" })
+    io.to("debugging").emit("log", { id: "as2", msg: "Listening to logs" })
+  })
+  socket.on('leave_debugging', () => {
+    socket.leave("debugging");
+    socket.emit('message', "you have left the debugging room");
+  })
   socket.on('disconnect', () => {
     delete SocketMap[socket.user.uid]
   })
@@ -88,16 +102,25 @@ if (app.get("BlockChain_Enable")) {
   const sc = fork('./MessageBroker/SingleConsumer.js')
   const bc = fork('./MessageBroker/BatchConsumer.js')
   sc.on('message', obj => {
-    let UserSocketId = SocketMap[obj.user.uid]
-    if (UserSocketId) {
-      if (obj.IsSuccess)
-        io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  has been published`);
-      else
-        io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  failed to publish due to unkonwn error please try after some time`);
-
+    if (obj.debugging) {
+      socketEmit.SendLogs(io, obj)
     }
-    console.log(obj)
-    console.log("single published")
+    if (obj.IsSuccess) {
+      let UserSocketId = SocketMap[obj.user.uid]
+      if (UserSocketId) {
+        if (obj.IsSuccess === true) {
+          socketEmit.sendMessage(io, UserSocketId, `certificate with id ${obj.certid}  has been published`)
+          console.log("single published")
+          // io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  has been published`);
+
+        } else
+          socketEmit.sendMessage(io, UserSocketId, `certificate with id ${obj.certid}  failed to publish due to unkonwn error please try after some time`);
+        // io.sockets.to(UserSocketId).emit("message", `certificate with id ${obj.certid}  failed to publish due to unkonwn error please try after some time`);
+
+      }
+    }
+   // console.log(obj)
+   
   });
   bc.on('message', obj => {
     let UserSocketId = SocketMap[obj.user.uid]

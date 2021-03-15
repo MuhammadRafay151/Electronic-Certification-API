@@ -5,10 +5,8 @@ const Roles = require('../js/Roles')
 const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
 const cert = require('../models/certificate');
-const invoke = require('../BlockChain/invoke');
-const cert_pdf = require('../js/CertificatePdf')
 const MsgBroker = require("../MessageBroker/publisher")
-
+const config = require("config")
 router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         var publish = {
@@ -19,12 +17,18 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
             processing: false
         }
         if (req.app.get("BlockChain_Enable")) {
-            let ct = await cert.updateOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } })
-            if (ct.nModified === 1) {
+            let ct = await cert.findOneAndUpdate({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } }).lean()
+            if (ct) {
+                if (config.get("app.debugging") === true) {
+                    const io = req.app.get("socketio");
+                    ct.message = "send to message queue";
+                    io.to("debugging").emit("log", ct);
+                }
                 await MsgBroker.send(true, { user: req.user, certid: req.body.id })
 
             }
             res.send("Processing started we will notify u soon")
+
         }
         else {
             var crt = await cert.findOneAndUpdate({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
@@ -35,6 +39,7 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
             }
         }
     } catch (err) {
+        console.log(err)
         res.status(500).send()
     }
 })
