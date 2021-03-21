@@ -86,8 +86,7 @@ io.on('connection', socket => {
   socket.on('join_debugging', () => {
     socket.join("debugging");
     socket.emit('message', "you are connected with debugging room");
-    io.to("debugging").emit("log", { id: "as", msg: "Listening to logs" })
-    io.to("debugging").emit("log", { id: "as2", msg: "Listening to logs" })
+    io.to("debugging").emit("log", { _id: "a1", message: "Listening to logs" })
   })
   socket.on('leave_debugging', () => {
     socket.leave("debugging");
@@ -119,18 +118,24 @@ if (app.get("BlockChain_Enable")) {
 
       }
     }
-   // console.log(obj)
-   
+    // console.log(obj)
+
   });
   bc.on('message', obj => {
-    let UserSocketId = SocketMap[obj.user.uid]
-    if (UserSocketId) {
-      if (obj.IsSuccess)
-        io.sockets.to(UserSocketId).emit("message", `batch with id ${obj.batchid} has been published`);
-      else
-        io.sockets.to(UserSocketId).emit("message", `batch with id ${obj.batchid} failed to publish due to unkonwn error please try after some time`);
+    if (obj.debugging) {
+      socketEmit.SendLogs(io, obj)
     }
-    console.log("batch published")
+    if (obj.IsSuccess) {
+      let UserSocketId = SocketMap[obj.user.uid]
+      if (UserSocketId) {
+        if (obj.IsSuccess === true)
+          socketEmit.sendMessage(io, UserSocketId, `batch with id ${obj.batchid} has been published`);
+        else
+          socketEmit.sendMessage(io, UserSocketId, `batch with id ${obj.batchid} failed to publish due to unkonwn error please try after some time`);
+      }
+      console.log("batch published")
+    }
+
   });
 }
 

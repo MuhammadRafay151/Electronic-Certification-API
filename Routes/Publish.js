@@ -54,7 +54,7 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
                     if (bt) {
                         if (config.get("app.debugging") === true) {
                             const io = req.app.get("socketio");
-                            ct.message = "send to message queue";
+                            bt.message = "send to message queue";
                             io.to("debugging").emit("log", bt);
                         }
                         await MsgBroker.send(false, { user: req.user, batchid: req.body.id })
