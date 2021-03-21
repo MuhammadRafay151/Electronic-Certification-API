@@ -13,16 +13,33 @@ async function PublishBatch(obj) {
             publisher_email: obj.user.email,
             publish_date: Date.now()
         }
-        let bt = await batch.findOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false }).lean()
+        let bt = await batch.findOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false }).lean();
+        if (config.get("app.debugging") === true) {
+            process.send({ ...bt, message: "batch information", debugging: true });
+        }
         let bcert = await batch_cert.find({ batch_id: obj.batchid }).lean()
+        if (config.get("app.debugging") === true) {
+            process.send({ _id: bt._id, candidates: [...bcert], message: "batch candidates", debugging: true });
+        }
         let fl = await files.find({ _id: { $in: [bt.logo, bt.signature] } }).lean()
         let logo = fl.find(obj => obj.type === "logo")
         let signature = fl.find(obj => obj.type === "signature")
         bt.logo = { image: Buffer.from(logo.binary.buffer).toString('base64'), mimetype: logo.mimetype }
         bt.signature = { image: Buffer.from(signature.binary.buffer).toString('base64'), mimetype: signature.mimetype }
+        if (config.get("app.debugging") === true) {
+            process.send({ ...bt, message: "Batch information after combining images", debugging: true });
+        }
         let CryptoCert = await BlockChainCert.ProcessBatchCerts(bt, bcert, publish)
+        if (config.get("app.debugging") === true) {
+            process.send({ _id: bt._id, candidates: [...CryptoCert], message: "Candidates certificates after merging", debugging: true });
+            process.send({ _id: bt._id,  message: "Sending batch to the blockchain", debugging: true });
+       
+        }
         await batchInvoke(CryptoCert, obj.user.uid)
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
+        if (config.get("app.debugging") === true) {
+            process.send({ _id: bt._id,  message: "Batch has been published to the blockchain", debugging: true });
+        }
         return true
         // let st = JSON.stringify(CryptoCert)
         // let te=JSON.parse(st)
@@ -54,7 +71,7 @@ async function PublishSingle(obj) {
         let signature = fl.find(obj => obj.type === "signature")
         crt.logo = { image: Buffer.from(logo.binary.buffer).toString('base64'), mimetype: logo.mimetype }
         crt.signature = { image: Buffer.from(signature.binary.buffer).toString('base64'), mimetype: signature.mimetype }
-       
+
         let CryptoCert = await BlockChainCert.GetBlockChainCert(crt, publish)
         if (config.get("app.debugging") === true) {
             let temp = { ...CryptoCert, message: "Final certificate", debugging: true };

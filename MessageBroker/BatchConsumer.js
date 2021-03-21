@@ -15,6 +15,12 @@ async function BatchConsumer() {
         await channel.assertQueue("batch");
         await channel.consume("batch", async msg => {
             let obj = JSON.parse(msg.content.toString())
+            if (config.get("app.debugging") === true) {
+                let temp = { ...obj, message: "recieved in batch consumer", debugging: true };
+                temp._id = temp.batchid;
+                delete temp.batchid;
+                process.send(temp);
+            }
             let IsSuccess = await pub.PublishBatch(obj)
             if (IsSuccess) {
                 process.send({ ...obj, IsSuccess });

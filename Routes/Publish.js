@@ -50,8 +50,13 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
             var bcert = await batch_cert.find({ batch_id: req.body.id }).countDocuments()
             if (bcert && bcert > 1) {
                 if (req.app.get("BlockChain_Enable")) {
-                    let bt = await batch.updateOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } })
-                    if (bt.nModified === 1) {
+                    let bt = await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': false }, { $set: { 'publish.processing': true } }).lean();
+                    if (bt) {
+                        if (config.get("app.debugging") === true) {
+                            const io = req.app.get("socketio");
+                            ct.message = "send to message queue";
+                            io.to("debugging").emit("log", bt);
+                        }
                         await MsgBroker.send(false, { user: req.user, batchid: req.body.id })
                         res.send("Processing started we will notify u soon")
                     }
