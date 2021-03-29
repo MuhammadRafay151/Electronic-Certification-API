@@ -18,17 +18,21 @@ router.get('/:id', async (req, res) => {
             result.blockchain = true
         }
         else {
-            var result = await cert.findOne({ _id: req.params.id }).lean()
+            var result = await cert.findOne({ _id: req.params.id, 'publish.status': true }).lean()
             if (!result) {
                 var bcert = await batch_cert.findOne({ _id: req.params.id }, { updatedby: 0 })
                 if (bcert) {
                     var b1 = await batch.findOne({ _id: bcert.batch_id, 'publish.status': true }, { updatedby: 0 }).lean()
-                    b1.issue_date = bcert.issue_date
-                    b1.batch_id = b1._id
-                    b1._id = bcert._id
-                    b1.name = bcert.name
-                    b1.email = bcert.email
-                    b1.blockchain = false
+                    if (b1) {
+                        b1.issue_date = bcert.issue_date
+                        b1.batch_id = b1._id
+                        b1._id = bcert._id
+                        b1.name = bcert.name
+                        b1.email = bcert.email
+                        b1.blockchain = false
+                    } else {
+                        return res.status(404).send()
+                    }
                 }
                 else {
                     return res.status(404).send()
@@ -44,15 +48,15 @@ router.get('/:id', async (req, res) => {
             result.is_expired = false
             result.message = "The Certificate is verfied"
         }
-        let x = await SendMail(
-            {
-                from: `${config.get("org.name")} <certifis.cf@gmail.com>`,
-                to: 'muhammadrafay151@gmail.com',
-                subject: 'Certificate Verification',
-                text: `Your ${result.title} certificate is verfied from the ${config.get("org.name")} Servers`
-            }
-        )
-        console.log(x)
+        // let x = await SendMail(
+        //     {
+        //         from: `${config.get("org.name")} <certifis.cf@gmail.com>`,
+        //         to: 'muhammadrafay151@gmail.com',
+        //         subject: 'Certificate Verification',
+        //         text: `Your ${result.title} certificate is verfied from the ${config.get("org.name")} Servers`
+        //     }
+        // )
+        // console.log(x)
         res.json(result)
     }
     catch (err) {
