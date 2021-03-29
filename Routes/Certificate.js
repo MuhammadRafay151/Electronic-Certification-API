@@ -28,7 +28,7 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
         title: req.body.title,
         description: req.body.description,
         name: req.body.name,
-        email: req.body.email,
+        email: req.body.email.toLowerCase(),
         instructor_name: req.body.instructor_name,
         logo: logo._id,
         signature: signature._id,
@@ -62,7 +62,7 @@ router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin,
             description: req.body.description,
             expiry_date: req.body.expiry_date,
             name: req.body.name,
-            email: req.body.email,
+            email: req.body.email.toLowerCase(),
             instructor_name: req.body.instructor_name,
             $push: {
                 "updatedby": {

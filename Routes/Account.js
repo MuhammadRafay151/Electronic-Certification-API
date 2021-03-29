@@ -24,7 +24,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
          }
          var s1 = new user({
             name: req.body.name,
-            email: req.body.email,
+            email: req.body.email.toLowerCase(),
             password: req.body.password,
             organization: {
                name: org.name,
@@ -58,7 +58,7 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
          }
          var s1 = new user({
             name: req.body.name,
-            email: req.body.email,
+            email: req.body.email.toLowerCase(),
             password: req.body.password,
             organization: {
                name: org.name,
@@ -84,7 +84,7 @@ router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorizat
    try {
       var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.params.orgid }, {
          name: req.body.name,
-         email: req.body.email,
+         email: req.body.email.toLowerCase(),
          phone: req.body.phone,
          country_code: req.body.country_code,
          address: req.body.address,
@@ -104,7 +104,7 @@ router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Ro
    try {
       var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.user.org_id }, {
          name: req.body.name,
-         email: req.body.email,
+         email: req.body.email.toLowerCase(),
          phone: req.body.phone,
          country_code: req.body.country_code,
          address: req.body.address,
@@ -226,7 +226,7 @@ router.put('/togglestatus/:userid', Auth.authenticateToken, Auth.CheckAuthorizat
 
 router.get('/Available/:email', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async (req, res) => {
    try {
-      var r1 = await user.exists({ email: req.params.email })
+      var r1 = await user.exists({ email: req.params.email.toLowerCase() })
       res.json({ IsAvailable: !r1 })
    } catch {
       res.status(500).send()

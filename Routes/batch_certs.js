@@ -127,7 +127,7 @@ function process_batch(data, req) {
             list.push({
                 batch_id: req.body.batch_id,
                 name: data[i].name,
-                email: data[i].email,
+                email: data[i].email.toLowerCase(),
                 issue_date: date,
                 issuedby: {
                     name: req.user.name,
