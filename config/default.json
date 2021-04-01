@@ -9,8 +9,8 @@
         "url": "amqp://192.168.174.128:5672"
     },
     "database": {
-        "url": "mongodb://localhost:27017/ecert",
-        "devurl": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
+        "devurl": "mongodb://localhost:27017/ecert",
+        "url": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert?retryWrites=true&w=majority"
     },
     "email": {
         "user": "certifis.cf@gmail.com",
