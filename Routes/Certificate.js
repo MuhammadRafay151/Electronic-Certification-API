@@ -5,12 +5,24 @@ const cert = require('../models/certificate');
 const user = require('../models/user')
 const files = require('../models/files')
 var multer = require('multer')
-var upload = multer()
-var pagination = require('./../js/pagination');
+const upload = multer({
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter: function (req, file, callback) {
+        var ext = path.extname(file.originalname);
+        if (ext !== '.png' && ext !== '.jpg'  && ext !== '.jpeg') {
+            return callback(new Error('Only images are allowed'))
+        }
+        callback(null, true)
+    },
+})
+const pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
 const { SingleSearch } = require("../js/search")
 const { SingleCertSort } = require("../js/sort")
-var cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
+const path = require('path')
+const cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
 router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
 
     var u1 = await user.findById(req.user.uid)

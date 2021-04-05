@@ -5,6 +5,7 @@ const user = require('../models/user')
 const Auth = require('../Auth/Auth')
 const pagination = require('../js/pagination')
 var multer = require('multer')
+const path = require('path')
 // var storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
 //         cb(null, './uploads')
@@ -16,7 +17,18 @@ var multer = require('multer')
 // })
 // var upload = multer({ storage: storage })
 const files = require('../models/files')
-var upload = multer()
+const upload = multer({
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter: function (req, file, callback) {
+        var ext = path.extname(file.originalname);
+        if (ext !== '.png' && ext !== '.jpg'  && ext !== '.jpeg') {
+            return callback(new Error('Only images are allowed'))
+        }
+        callback(null, true)
+    },
+})
 const Roles = require('../js/Roles')
 const { BatchesSearch } = require("../js/search")
 const { BatchCertSort } = require("../js/sort")
