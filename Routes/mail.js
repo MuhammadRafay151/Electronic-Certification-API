@@ -7,7 +7,7 @@ const batch_cert = require('../models/batch_certificates');
 const batch = require("../models/batch");
 const { SendMail } = require('../js/nodemailer')
 const config = require("config");
-router.post('/single/:id', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
+router.post('/single/:id', auth.authenticateToken, async (req, res) => {
 
     try {
         let result = await cert.findOne({ _id: req.params.id, 'publish.status': true })
@@ -30,10 +30,10 @@ router.post('/single/:id', auth.authenticateToken, auth.CheckAuthorization([role
     }
 
 })
-router.post('/batchcert/:batch_id/:cert_id', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
+router.post('/batchcert/:batch_id/:cert_id', auth.authenticateToken, async (req, res) => {
 
     try {
-        let bt = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id, 'publish.status': true })
+        let bt = await batch.findOne({ _id: req.params.batch_id,  'publish.status': true })
         if (bt) {
             let bcert = await batch_cert.findOne({ _id: req.params.cert_id }).lean();
             if (bcert) {
@@ -59,10 +59,10 @@ router.post('/batchcert/:batch_id/:cert_id', auth.authenticateToken, auth.CheckA
     }
 
 })
-router.post('/batch/:id', auth.authenticateToken, auth.CheckAuthorization([role.Admin, role.Issuer]), async (req, res) => {
+router.post('/batch/:id', auth.authenticateToken, async (req, res) => {
     try {
         let link = config.get("app.verification_url")
-        let _batch = await batch.findOne({ _id: req.params.id, 'createdby.org_id': req.user.org_id, 'publish.status': true }).lean();
+        let _batch = await batch.findOne({ _id: req.params.id,  'publish.status': true }).lean();
         if (_batch) {
             let _batches = await batch_cert.find({ batch_id: _batch._id }).lean();
             for (let i = 0; i < _batches.length; i++) {
