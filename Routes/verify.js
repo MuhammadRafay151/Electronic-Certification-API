@@ -14,7 +14,10 @@ router.get('/:id', async (req, res) => {
             return res.status(400).send("Invalid Code");
         if (req.app.get("BlockChain_Enable")) {
             var result = await GetCertificate(req.params.id)
+            if (!result)
+                return res.status(404).send()
             result = JSON.parse(result)
+            result._id = req.params.id
             result.blockchain = true
         }
         else {
@@ -41,7 +44,7 @@ router.get('/:id', async (req, res) => {
             }
 
         }
-        if (result.expiry_date && result.expiry_date - Date.now() < 0) {
+        if (result.expiry_date && new Date(result.expiry_date) - Date.now() < 0) {
             result.is_expired = true
             result.message = "The Certificate is verfied but the validity is expired"
         } else {
@@ -60,7 +63,6 @@ router.get('/:id', async (req, res) => {
         res.json(result)
     }
     catch (err) {
-        console.log(err)
         res.status(500).send()
     }
 })

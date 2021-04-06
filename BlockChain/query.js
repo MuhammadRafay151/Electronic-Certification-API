@@ -42,7 +42,7 @@ async function GetCertificate(certificate_key) {
         // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
         // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
         const result = await contract.evaluateTransaction('QueryCertificate', certificate_key);
-       // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
         await gateway.disconnect();
         return result.toString()
         // Disconnect from the gateway.
@@ -50,6 +50,7 @@ async function GetCertificate(certificate_key) {
 
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
+        return null;
         //await gateway.disconnect();
         // process.exit(1);
     }
