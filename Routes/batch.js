@@ -19,7 +19,7 @@ const path = require('path')
 const files = require('../models/files')
 const upload = multer({
     limits: {
-        fileSize: 1000000,
+        fileSize: 500000,
     },
     fileFilter: function (req, file, callback) {
         var ext = path.extname(file.originalname);
