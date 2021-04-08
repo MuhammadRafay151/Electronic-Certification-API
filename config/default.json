@@ -17,8 +17,8 @@
         "pass": "certifis@123"
     },
     "app": {
-        "BlockChain_Enable": true,
-        "verification_url": "http://localhost:8080/verification/",
+        "BlockChain_Enable": false,
+        "verification_url": "http://certifis.herokuapp.com/verification/",
         "debugging": false,
         "TokenExpiry":"2h"
     }
