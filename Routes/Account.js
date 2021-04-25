@@ -17,7 +17,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
             return res.status(400).send("User limit reached")
          }
          var Admin = await user.exists({ 'organization.id': org.id, roles: Roles.Admin })
-         if (Admin) {
+         if (Admin && "AllowAdmin" in req.body && req.body.AllowAdmin === false) {
             roles = [Roles.Issuer]
          } else {
             roles = [Roles.Admin, Roles.Issuer]
@@ -56,7 +56,7 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
          if (org.user_limit == TotalEnroll && !req.user.roles.includes(Roles.SuperAdmin)) {
             return res.status(400).send("User limit reached")
          }
-         var s1 = new user({
+         let u1 = {
             name: req.body.name,
             email: req.body.email.toLowerCase(),
             password: req.body.password,
@@ -69,8 +69,13 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
             phone: req.body.phone,
             country_code: req.body.country_code,
             address: req.body.address,
-         });
-         var response = await s1.save()
+         }
+         if ("AllowAdmin" in req.body && req.body.AllowAdmin === true)//according to fyp poiunted issues
+         {
+            u1.roles.push(Roles.Admin);
+         }
+         let s1 = new user(u1);
+         let response = await s1.save()
          res.status(200).send("Registered Successfully")
       } else {
          res.status(404).send()
@@ -82,13 +87,21 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
 });
 router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
-      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.params.orgid }, {
+      let ModifiedUser = {
          name: req.body.name,
          email: req.body.email.toLowerCase(),
          phone: req.body.phone,
          country_code: req.body.country_code,
          address: req.body.address,
-      }, { new: true })
+      }
+      if ("AllowAdmin" in req.body && req.body.AllowAdmin === false) {
+         ModifiedUser.$pull = { roles: Roles.Admin }
+
+      } else {
+         ModifiedUser.$addToSet = { roles: Roles.Admin }
+
+      }
+      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.params.orgid }, ModifiedUser, { new: true })
       if (u1) {
          res.json(u1)
       } else {
@@ -102,13 +115,21 @@ router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorizat
 });
 router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
    try {
-      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.user.org_id }, {
+      let ModifiedUser = {
          name: req.body.name,
          email: req.body.email.toLowerCase(),
          phone: req.body.phone,
          country_code: req.body.country_code,
          address: req.body.address,
-      }, { new: true })
+      }
+      if ("AllowAdmin" in req.body && req.body.AllowAdmin === false) {
+         ModifiedUser.$pull = { roles: Roles.Admin }
+
+      } else {
+         ModifiedUser.$addToSet = { roles: Roles.Admin }
+
+      }
+      var u1 = await user.findOneAndUpdate({ _id: req.body._id, 'organization.id': req.user.org_id }, ModifiedUser, { new: true })
       if (u1) {
          res.json(u1)
       } else {
@@ -124,9 +145,18 @@ router.post('/login', async function (req, res) {
    try {
       var response = await user.findOne({ email: req.body.email, password: req.body.password })
       if (response == null) {
-         res.status(401).json({ message: "Invalid username or password" })
+         return res.status(401).json({ message: "Invalid username or password" })
       }
-      else if (response.status.active == true) {
+      if (!response.roles.includes(Roles.SuperAdmin)) {
+         let org = await organization.findOne({ _id: response.organization.id })
+         console.log(org)
+         if (org === null) {
+            return res.status(409).json({ message: "Organization does not exist " })
+         } else if (org.status.active === false) {
+            return res.status(409).json({ message: "Organization has been disabled " })
+         }
+      }
+      if (response.status.active == true) {
          let token_data = { uid: response._id, email: response.email, name: response.name, roles: response.roles }
          if (response.organization) {
             token_data.org_id = response.organization.id
@@ -137,9 +167,9 @@ router.post('/login', async function (req, res) {
          delete response._doc.password
          response._doc.token = token
          response._doc.RefreshToken = RefreshToken
-         res.json(response)
+         return res.json(response)
       } else {
-         res.status(403).json({ message: "Account has been disabled" })
+         return res.status(409).json({ message: "Account has been disabled" })
       }
    } catch (err) {
       res.send(err)

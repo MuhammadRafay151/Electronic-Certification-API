@@ -22,6 +22,22 @@ router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdm
         res.json(err)
     }
 })
+router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    try {
+        var r1 = await organization.findOne({ _id: req.body.id })
+        if (r1) {
+            var r2 = await organization.findOneAndUpdate({ _id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
+            console.log(r2)
+            res.status(200).send("Status changed successfully")
+        } else {
+            res.status(400).send()
+        }
+    }
+    catch (err) {
+        res.status(500).send()
+    }
+
+})
 router.put('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         let org = await organization.findOneAndUpdate({ _id: req.params.id }, {
@@ -36,21 +52,6 @@ router.put('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperA
     catch (err) {
         res.json(err)
     }
-})
-router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    try {
-        var r1 = await organization.findOne({ _id: req.body.id })
-        if (r1) {
-            var r2 = await organization.findOneAndUpdate({ _id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
-            res.status(200).send("Status changed successfully")
-        } else {
-            res.status(400).send()
-        }
-    }
-    catch (err) {
-        res.status(500).send()
-    }
-
 })
 router.get("/", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
 
