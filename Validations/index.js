@@ -1,4 +1,4 @@
-const { check } = require("express-validator")
+const { check, body } = require("express-validator")
 const ChangePasswordValidatior = [
     check("current", "current passsowrd is required").notEmpty(),
     check("new", "new passsword should be greater than 6 charaters").isLength({ min: 6 }),
@@ -9,4 +9,8 @@ const ChangePasswordValidatior = [
         return true;
     }),
 ]
-module.exports = { ChangePasswordValidatior }
+const CountValidator = [
+    body("count", "count is required").isInt(),
+    body("count", "count is required").notEmpty(),
+]
+module.exports = { ChangePasswordValidatior, CountValidator }

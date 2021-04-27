@@ -27,7 +27,6 @@ router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Rol
         var r1 = await organization.findOne({ _id: req.body.id })
         if (r1) {
             var r2 = await organization.findOneAndUpdate({ _id: req.body.id }, { "$set": { status: { active: !r1.status.active } } })
-            console.log(r2)
             res.status(200).send("Status changed successfully")
         } else {
             res.status(400).send()

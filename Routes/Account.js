@@ -5,7 +5,7 @@ const Auth = require('../Auth/Auth')
 const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 const RFT = require('../models/tokens');
-const { ChangePasswordValidatior } = require("../Validations/validation")
+const { ChangePasswordValidatior } = require("../Validations")
 const { validationResult } = require('express-validator')
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
@@ -149,7 +149,6 @@ router.post('/login', async function (req, res) {
       }
       if (!response.roles.includes(Roles.SuperAdmin)) {
          let org = await organization.findOne({ _id: response.organization.id })
-         console.log(org)
          if (org === null) {
             return res.status(409).json({ message: "Organization does not exist " })
          } else if (org.status.active === false) {
