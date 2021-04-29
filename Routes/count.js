@@ -25,7 +25,6 @@ router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.Sup
             }
             else if (cert_count < 0)//decrement
             {
-                console.log(org)
                 if (org.ecertcount - cert_count * -1 < 0) // mulitplying by -1 to remove the effect of - sign because we are sending '-' sign for which we are detetcing decrease request so in actually subtration it causes -*- =1 so that is the cause of wrong input
                     return res.status(409).send("count cannot be less than 0")
                 r1 = await organization.updateOne({ _id: req.params.orgid, $expr: { $gte: [{ $subtract: ["$ecertcount", cert_count * -1] }, 0] } }, {
