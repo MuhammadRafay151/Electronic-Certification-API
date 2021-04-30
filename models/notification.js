@@ -16,6 +16,6 @@ const Notification = mongoose.Schema({
         type: String,
         required: true,
     },
-    SceneBy: [mongoose.Schema.Types.ObjectId]
+    sceneBy: [mongoose.Schema.Types.ObjectId]
 });
 module.exports = mongoose.model("Notification", Notification);

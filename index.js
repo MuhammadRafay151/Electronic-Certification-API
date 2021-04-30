@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const swaggerUi = require('swagger-ui-express');
+const {swaggerDocument} = require('./Swagger/config');
 const server = require('http').createServer(app);
 var cors = require('cors')
 const config = require('config');
@@ -62,6 +64,7 @@ app.use("/api/verify", verify)
 app.use("/api/dashboard", dashboard)
 app.use("/api/report", report)
 app.use("/image", image)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //app config loading
 const app_config = config.get("app")
 const debugging = config.get("app.debugging")

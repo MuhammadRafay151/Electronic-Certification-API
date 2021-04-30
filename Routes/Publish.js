@@ -46,8 +46,9 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
                     await CountHandler.IncreaseCount(req.user.org_id, 1);
                     res.status(404).send("certificate not found")
                 }
-            } catch {
+            } catch(err) {
                 await CountHandler.IncreaseCount(req.user.org_id, 1);
+                console.log(err)
                 res.status(500).send(err)
             }
 

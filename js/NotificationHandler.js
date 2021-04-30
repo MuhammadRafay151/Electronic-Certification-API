@@ -1,11 +1,11 @@
 const Notification = require('../models/notification');
-async function NewNotification(user, message, Audience) {
+async function NewNotification(user, message, audience) {
     //user is extracted from token
     let data = {
-        UserId: user.uid,
-        OrganizationId: user.org_id,
-        Audience: Audience,
-        Message: message,
+        userId: user.uid,
+        organizationId: user.org_id,
+        audience: audience,
+        message: message,
     }
     let notification = new Notification(data);
     let response = await notification.save();
