@@ -24,6 +24,7 @@ const publish = require('./Routes/Publish')
 const verify = require('./Routes/verify')
 const dashboard = require('./Routes/DashBoard')
 const report = require("./Routes/Report")
+const Notification = require("./Routes/Notification")
 const fs = require('fs').promises;
 var multer = require('multer');
 const Auth = require('./Auth/Auth');
@@ -64,6 +65,7 @@ app.use("/api/verify", verify)
 app.use("/api/dashboard", dashboard)
 app.use("/api/report", report)
 app.use("/image", image)
+app.use("/api/notification", Notification)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //app config loading
 const app_config = config.get("app")

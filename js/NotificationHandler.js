@@ -6,6 +6,7 @@ async function NewNotification(user, message, audience) {
         organizationId: user.org_id,
         audience: audience,
         message: message,
+        date: Date.now(),
     }
     let notification = new Notification(data);
     let response = await notification.save();

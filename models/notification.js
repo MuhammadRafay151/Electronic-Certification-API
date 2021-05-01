@@ -10,12 +10,17 @@ const Notification = mongoose.Schema({
         required: true
     },
     audience: {
+        type: "string",
         enum: [Public, Private],
     },
     message: {
         type: String,
         required: true,
     },
-    sceneBy: [mongoose.Schema.Types.ObjectId]
+    date: {
+        type: Date,
+        required: true
+    },
+    seenBy: [mongoose.Schema.Types.ObjectId]
 });
 module.exports = mongoose.model("Notification", Notification);

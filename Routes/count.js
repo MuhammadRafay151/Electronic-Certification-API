@@ -12,7 +12,7 @@ const { validationResult } = require('express-validator');
 router.put('/:orgid', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), CountValidator,
     async (req, res) => {
         try {
-            const errors = validationResult(req);
+            let errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }

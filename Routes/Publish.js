@@ -64,7 +64,7 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
 })
 router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
-        let bt = await batch.exists({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false })
+        let bt = await batch.findOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false })
         if (bt) {
             let bcert = await batch_cert.find({ batch_id: req.body.id }).countDocuments()
             if (bcert && bcert > 1) {
@@ -91,7 +91,9 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
                         processing: false
                     }
                     try {
-                        await batch.updateOne({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
+                        await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
+                        let message = `${bt.batch_name} batch with id: ${bt._id} has been published`;
+                        await NotificationHandler.NewNotification(req.user, message, Constants.Private);
                         res.send("Batch Published...")
                     } catch (err) {
                         await CountHandler.IncreaseCount(req.user.org_id, bcert);

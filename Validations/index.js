@@ -13,4 +13,12 @@ const CountValidator = [
     body("count", "count is required").isInt(),
     body("count", "count is required").notEmpty(),
 ]
-module.exports = { ChangePasswordValidatior, CountValidator }
+const NotificationValidator = [
+    body("ids", "ids is required").notEmpty(),
+    body("ids", "ids must be an array").isArray({ min: 1 }),
+]
+module.exports = {
+    ChangePasswordValidatior,
+    CountValidator,
+    NotificationValidator
+}
