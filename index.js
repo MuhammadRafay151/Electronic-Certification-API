@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const swaggerUi = require('swagger-ui-express');
-const {swaggerDocument} = require('./Swagger/config');
+const { swaggerDocument } = require('./Swagger/config');
 const server = require('http').createServer(app);
 var cors = require('cors')
 const config = require('config');
@@ -28,6 +28,7 @@ const Notification = require("./Routes/Notification")
 const fs = require('fs').promises;
 var multer = require('multer');
 const Auth = require('./Auth/Auth');
+const forget = require("./Routes/forget");
 const socketEmit = require('./js/socketEmit')
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -66,6 +67,7 @@ app.use("/api/dashboard", dashboard)
 app.use("/api/report", report)
 app.use("/image", image)
 app.use("/api/notification", Notification)
+app.use("/api/forget", forget)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //app config loading
 const app_config = config.get("app")

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const batch_certificate = mongoose.Schema({
     batch_id: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
     name: {

@@ -6,7 +6,8 @@ const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 const RFT = require('../models/tokens');
 const { ChangePasswordValidatior } = require("../Validations")
-const { validationResult } = require('express-validator')
+const { validationResult } = require('express-validator');
+const config = require('config');
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ _id: req.params.orgid })
@@ -292,10 +293,24 @@ router.put('/password', Auth.authenticateToken, Auth.CheckAuthorization([Roles.S
 //    let reset_token = req.body.reset_token
 //    res.status(200).send()
 // })
-// router.get('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorization[Roles.SuperAdmin, Roles.Admin], async (req, res) => {
-//    let _new = req.body.new
-//    let confirm = req.body.confirm
-//    let reset_token = req.body.reset_token
-//    res.status(200).send()
-// })
+router.get('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),
+   async (req, res) => {
+      try {
+         let response = null;
+         if (req.user.roles.includes(Roles.SuperAdmin)) {
+            response = await user.findOne({ _id: req.params.uid })
+
+         } else {
+            response = await user.findOne({ _id: req.params.uid, "organization.id": req.user.org_id })
+         }
+         if (!response)
+            return res.status(404).send("user does not exist")
+         let token = Auth.generatePrToken({ uid: response._id }, 300)
+         let resetUrl = `${config.get("app.reset_url")}?token=${token}`
+         res.send(resetUrl);
+      } catch (err) {
+         console.log(err)
+         res.status(500).send();
+      }
+   })
 module.exports = router

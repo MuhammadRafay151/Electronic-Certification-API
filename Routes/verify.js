@@ -5,8 +5,8 @@ const batch_cert = require('../models/batch_certificates')
 const cert = require('../models/certificate');
 const mongoose = require("mongoose");
 const { GetCertificate } = require("../BlockChain/query")
-const { SendMail } = require("../js/nodemailer")
-const config = require("config")
+// const { SendMail } = require("../js/nodemailer")
+// const config = require("config")
 
 router.get('/:id', async (req, res) => {
     try {

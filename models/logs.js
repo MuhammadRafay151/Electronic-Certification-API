@@ -10,6 +10,7 @@ const Logs = mongoose.Schema({
         required: true
     },
     status: {
+        type: String,
         enum: [Success, Error, Pending],
     }
 });

@@ -6,7 +6,7 @@ const Notification = require('../models/notification');
 const { ObjectID } = require("mongodb")
 const { NotificationValidator } = require("../Validations");
 const { validationResult } = require('express-validator');
-router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin, Roles.SuperAdmin]),
+router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin,]),
     async (req, res) => {
         try {
             let response = await Notification.aggregate([
@@ -23,6 +23,7 @@ router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, R
                     }
                 },
             ])
+            response = { list: response, count: 0 }
             res.json(response);
         } catch (err) {
             console.log(err)
@@ -32,7 +33,7 @@ router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, R
 router.get('/unread/count', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin, Roles.SuperAdmin]),
     async (req, res) => {
         try {
-            let response = await Notification.find({ organizationId: req.user.org_id, seenBy: { $nin: req.user.uid } }).countDocuments();
+            let response = await Notification.find({ organizationId: new ObjectID(req.user.org_id), seenBy: { $nin: new ObjectID(req.user.uid), } }).countDocuments();
             res.json({ count: response });
 
         } catch (err) {

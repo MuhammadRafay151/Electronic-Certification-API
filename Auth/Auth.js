@@ -35,6 +35,13 @@ function generateRefreshToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
   return jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 }
+function generatePrToken(obj, expTime) {
+  return jwt.sign(obj, process.env.PASSWORD_RESET_TOKEN, { expiresIn: expTime });
+}
+function authenticatePrToken(token) {
+  let result = jwt.verify(token, process.env.PASSWORD_RESET_TOKEN.toString())
+  return result
+}
 function CheckAuthorization(AllowedRoles) {
   return async (req, res, next) => {
     var UserRole = req.user.roles;
@@ -59,6 +66,8 @@ module.exports = {
   AuthenticateSocket: AuthenticateSocket,
   CheckAuthorization: CheckAuthorization,
   generateRefreshToken: generateRefreshToken,
-  authenticateRefreshToken: authenticateRefreshToken
+  authenticateRefreshToken: authenticateRefreshToken,
+  generatePrToken,
+  authenticatePrToken
 
 }
