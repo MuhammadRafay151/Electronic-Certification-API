@@ -47,19 +47,15 @@ const BatchValidator = [
 
 ]
 
-const UpdateBatchValidator = [
-
-    check("batch_name", "Batch Name is required").notEmpty(),
+const UpdateBatchValidator=[
+    
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
     check("instructor_name", "Instructor_Name is required").notEmpty(),
-    check("id", "CertificateID is required").notEmpty(),
-
 
 ]
 
-
-const PublishValidator = [
+const PublishValidator=[
     body("id", "CertificateID is required").notEmpty(),
 
 ]
@@ -95,8 +91,8 @@ module.exports = {
     CountValidator,
     CertificateValidator,
     BatchValidator,
+    UpdateBatchValidator,
     PublishValidator,
     RegisterWithOrgValidator,
-    RegisterValidator,
-    UpdateBatchValidator
+    RegisterValidator
 }
