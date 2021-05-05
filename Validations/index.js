@@ -36,9 +36,8 @@ const CertificateValidator = [
     check("template_id", "TemplateID is required").notEmpty(),
 ]
 
-
-const BatchValidator = [
-
+const BatchValidator=[
+    
     check("batch_name", "Batch Name is required").notEmpty(),
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
@@ -55,13 +54,8 @@ const UpdateBatchValidator=[
 
 ]
 
-const PublishValidator=[
-    body("id", "CertificateID is required").notEmpty(),
 
-]
-
-const RegisterWithOrgValidator = [
-    param("orgid", "OrganizationID is required").notEmpty(),
+const RegisterValidator=[
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
@@ -73,16 +67,19 @@ const RegisterWithOrgValidator = [
 
 ]
 
-const RegisterValidator = [
+const UpdateProfileValidator=[
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
-    body("password", "password is required").notEmpty(),
     body("phone", "CertificateID is required").notEmpty(),
     body("country_code", "CertificateID is required").notEmpty(),
     body("address", "CertificateID is required").notEmpty(),
+]
 
-
+const LoginValidator=[
+    body("password", "password is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
 ]
 
 module.exports = {
@@ -92,7 +89,7 @@ module.exports = {
     CertificateValidator,
     BatchValidator,
     UpdateBatchValidator,
-    PublishValidator,
-    RegisterWithOrgValidator,
-    RegisterValidator
+    RegisterValidator,
+    UpdateProfileValidator,
+    LoginValidator
 }
