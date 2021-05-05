@@ -1,4 +1,4 @@
-const { check, body } = require("express-validator")
+const { check, body, param } = require("express-validator")
 const ChangePasswordValidator = [
     check("current", "current passsowrd is required").notEmpty(),
     check("new", "new passsword should be greater than 6 charaters").isLength({ min: 6 }),
@@ -20,17 +20,83 @@ const ResetPasswordValidator = [
     }),
     check("token", "reset token is required").notEmpty(),
 ]
-const CountValidator = [
-    body("count", "count is required").isInt(),
-    body("count", "count is required").notEmpty(),
-]
 const NotificationValidator = [
     body("ids", "ids is required").notEmpty(),
     body("ids", "ids must be an array").isArray({ min: 1 }),
 ]
+const CountValidator = [
+    body("count", "count is required").isInt(),
+    body("count", "count is required").notEmpty(),
+]
+const CertificateValidator = [
+    check("name", "Name is required").notEmpty(),
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+    check("instructor_name", "Instructor_Name is required").notEmpty(),
+    check("template_id", "TemplateID is required").notEmpty(),
+]
+
+
+const BatchValidator = [
+
+    check("batch_name", "Batch Name is required").notEmpty(),
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+    check("instructor_name", "Instructor_Name is required").notEmpty(),
+    check("template_id", "TemplateID is required").notEmpty(),
+
+]
+
+const UpdateBatchValidator = [
+
+    check("batch_name", "Batch Name is required").notEmpty(),
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+    check("instructor_name", "Instructor_Name is required").notEmpty(),
+    check("id", "CertificateID is required").notEmpty(),
+
+
+]
+
+
+const PublishValidator = [
+    body("id", "CertificateID is required").notEmpty(),
+
+]
+
+const RegisterWithOrgValidator = [
+    param("orgid", "OrganizationID is required").notEmpty(),
+    body("name", "Name is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+    body("password", "password is required").notEmpty(),
+    body("phone", "CertificateID is required").notEmpty(),
+    body("country_code", "CertificateID is required").notEmpty(),
+    body("address", "CertificateID is required").notEmpty(),
+
+
+]
+
+const RegisterValidator = [
+    body("name", "Name is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+    body("password", "password is required").notEmpty(),
+    body("phone", "CertificateID is required").notEmpty(),
+    body("country_code", "CertificateID is required").notEmpty(),
+    body("address", "CertificateID is required").notEmpty(),
+
+
+]
+
 module.exports = {
-    ChangePasswordValidator,
-    CountValidator,
+    ChangePasswordValidator, ResetPasswordValidator,
     NotificationValidator,
-    ResetPasswordValidator
+    CountValidator,
+    CertificateValidator,
+    BatchValidator,
+    PublishValidator,
+    RegisterWithOrgValidator,
+    RegisterValidator,
+    UpdateBatchValidator
 }
