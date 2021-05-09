@@ -113,12 +113,13 @@ router.post("/", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, R
 })
 router.put("/:id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]) ,cpUpload,UpdateBatchValidator, async (req, res) => {
 
-    const errors = validationResult(req);
+    
+
+    try {
+        const errors = validationResult(req);
     if (!errors.isEmpty()) {
        return res.status(400).json({ errors: errors.array() });
     }
-
-    try {
         var data = {
             title: req.body.title,
             description: req.body.description,

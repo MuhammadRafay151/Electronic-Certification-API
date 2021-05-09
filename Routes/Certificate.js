@@ -76,12 +76,14 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
     //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
 router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload,CertificateValidator, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       return res.status(400).json({ errors: errors.array() });
-    }
+  
    
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+           return res.status(400).json({ errors: errors.array() });
+        }
+
         var u1 = await user.findById(req.user.uid)
         var temp = {
             title: req.body.title,
