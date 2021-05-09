@@ -6,6 +6,7 @@ const Notification = require('../models/notification');
 const { ObjectID } = require("mongodb")
 const { NotificationValidator } = require("../Validations");
 const { validationResult } = require('express-validator');
+const NotificationHandler = require("../js/NotificationHandler");
 router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin,]),
     async (req, res) => {
         try {
@@ -13,7 +14,7 @@ router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, R
                 { $match: { organizationId: new ObjectID(req.user.org_id) } },
                 {
                     $project: {
-
+                        date: 1,
                         message: 1,
                         Isread: {
                             $cond: [{ $in: [new ObjectID(req.user.uid), "$seenBy"] }, true, false]
@@ -33,7 +34,7 @@ router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, R
 router.get('/unread/count', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin, Roles.SuperAdmin]),
     async (req, res) => {
         try {
-            let response = await Notification.find({ organizationId: new ObjectID(req.user.org_id), seenBy: { $nin: new ObjectID(req.user.uid), } }).countDocuments();
+            let response = await NotificationHandler.UnReadCount(req.user);
             res.json({ count: response });
 
         } catch (err) {
@@ -60,13 +61,3 @@ router.patch('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer,
     })
 
 module.exports = router
-// $project: {
-//     sceneBy: 0,
-//     read: {
-//         $cond: {
-//             if: { '$sceneBy': { $nin: req.user.uid } },
-//             then: true,
-//             else: false
-//         }
-//     }
-// }

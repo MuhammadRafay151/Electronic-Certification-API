@@ -5,9 +5,10 @@ const Auth = require('../Auth/Auth')
 const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 const RFT = require('../models/tokens');
-const { ChangePasswordValidatior } = require("../Validations")
+const { ChangePasswordValidator, ResetPasswordValidator } = require("../Validations")
 const { validationResult } = require('express-validator');
 const config = require('config');
+const { SendMail } = require('../js/nodemailer');
 router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
    try {
       var org = await organization.findOne({ _id: req.params.orgid })
@@ -264,7 +265,7 @@ router.get('/Available/:email', Auth.authenticateToken, Auth.CheckAuthorization(
 })
 //
 router.put('/password', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),
-   ChangePasswordValidatior, async (req, res) => {
+   ChangePasswordValidator, async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
          return res.status(400).json({ errors: errors.array() });
@@ -287,13 +288,9 @@ router.put('/password', Auth.authenticateToken, Auth.CheckAuthorization([Roles.S
          return res.status(500).send(err)
       }
    })
-// router.put('/resetpassword', async (req, res) => {
-//    let _new = req.body.new
-//    let confirm = req.body.confirm
-//    let reset_token = req.body.reset_token
-//    res.status(200).send()
-// })
-router.get('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),
+
+//reset password link
+router.post('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),
    async (req, res) => {
       try {
          let response = null;
@@ -305,12 +302,47 @@ router.get('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorizatio
          }
          if (!response)
             return res.status(404).send("user does not exist")
-         let token = Auth.generatePrToken({ uid: response._id }, 300)
+         let exp = config.get("app.reset_url_expiry");
+         let token = Auth.generatePrToken({ uid: response._id }, exp)
          let resetUrl = `${config.get("app.reset_url")}?token=${token}`
-         res.send(resetUrl);
+         await SendMail(
+            {
+               from: `<certifis.cf@gmail.com>`,
+               to: response.email,
+               subject: `Certifis forget password`,
+               text: resetUrl
+            }
+         )
+         console.log(resetUrl)
+         res.send(`reset link has been sent to ${response.email} which will expire in ${exp / 60} minutes`);
       } catch (err) {
          console.log(err)
          res.status(500).send();
       }
+   })
+//reset password using token
+router.put('/resetpassword', ResetPasswordValidator,
+   async (req, res) => {
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+      try {
+         let uid = Auth.authenticatePrToken(req.body.token).uid
+         console.log(uid)
+         let result = await user.findOneAndUpdate({ _id: uid, }, { password: req.body.new })
+         if (result) {
+            await RFT.deleteMany({ userid: uid })
+            return res.status(200).send()
+         }
+         else {
+            return res.status(404).send("user not found")
+         }
+      }
+      catch (err) {
+         return res.status(410).send("link has been expired");
+      }
+
    })
 module.exports = router

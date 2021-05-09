@@ -1,4 +1,5 @@
 const Notification = require('../models/notification');
+const { ObjectID } = require("mongodb")
 async function NewNotification(user, message, audience) {
     //user is extracted from token
     let data = {
@@ -12,6 +13,11 @@ async function NewNotification(user, message, audience) {
     let response = await notification.save();
     return response;
 }
+async function UnReadCount(user) {
+    let response = await Notification.find({ organizationId: new ObjectID(user.org_id), seenBy: { $nin: new ObjectID(user.uid), } }).countDocuments();
+    return response;
+}
 module.exports = {
-    NewNotification
+    NewNotification,
+    UnReadCount
 }

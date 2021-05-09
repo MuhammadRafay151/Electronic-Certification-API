@@ -30,6 +30,7 @@ var multer = require('multer');
 const Auth = require('./Auth/Auth');
 const forget = require("./Routes/forget");
 const socketEmit = require('./js/socketEmit')
+const SocketSingleton = require("./js/Socket");
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads')
@@ -71,7 +72,6 @@ app.use("/api/forget", forget)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //app config loading
 const app_config = config.get("app")
-const debugging = config.get("app.debugging")
 
 app.set("BlockChain_Enable", app_config.BlockChain_Enable)
 
@@ -260,7 +260,7 @@ app.get("/home/wel", (req, res) => {
 app.get("/user/:id", (req, res) => {
   res.status(200).send(req.params.id);
 });
-
+new SocketSingleton(io,SocketMap);
 app.set('socketio', io);
 app.set('SocketMap', SocketMap);
 mongoose.set('useFindAndModify', false);

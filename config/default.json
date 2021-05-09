@@ -20,6 +20,7 @@
         "BlockChain_Enable": false,
         "verification_url": "http://certifis.herokuapp.com/verification/",
         "reset_url": "http://certifis.herokuapp.com/verification",
+        "reset_url_expiry": 300,
         "debugging": false,
         "TokenExpiry": "2h"
     }
