@@ -32,7 +32,6 @@ const CertificateValidator = [
     check("name", "Name is required").notEmpty(),
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
-    check("instructor_name", "Instructor_Name is required").notEmpty(),
     check("template_id", "TemplateID is required").notEmpty(),
 ]
 
@@ -41,7 +40,6 @@ const BatchValidator = [
     check("batch_name", "Batch Name is required").notEmpty(),
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
-    check("instructor_name", "Instructor_Name is required").notEmpty(),
     check("template_id", "TemplateID is required").notEmpty(),
 
 ]
@@ -50,7 +48,6 @@ const UpdateBatchValidator = [
 
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
-    check("instructor_name", "Instructor_Name is required").notEmpty(),
 
 ]
 
@@ -60,10 +57,7 @@ const RegisterValidator = [
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
     body("password", "password is required").notEmpty(),
-    body("phone", "phone is required").notEmpty(),
     body("phone", "Invalid phone number").isNumeric(),
-    body("country_code", "country_code is required").notEmpty(),
-    body("address", "address is required").notEmpty(),
 
 
 ]
@@ -72,10 +66,7 @@ const UpdateProfileValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
-    body("phone", "phone is required").notEmpty(),
     body("phone", "Invalid phone number").isNumeric(),
-    body("country_code", "country_code is required").notEmpty(),
-    body("address", "address is required").notEmpty(),
 ]
 
 const LoginValidator = [
@@ -88,10 +79,8 @@ const OrgniazationValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
-    body("phone", "phone is required").notEmpty(),
     body("phone", "Invalid phone number").isNumeric(),
-    body("country_code", "country_code is required").notEmpty(),
-    body("address", "address is required").notEmpty(),
+  
 ]
 
 module.exports = {
