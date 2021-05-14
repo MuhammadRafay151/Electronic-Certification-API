@@ -11,7 +11,7 @@ const { validationResult } = require('express-validator')
 const config = require('config');
 const { SendMail } = require('../js/nodemailer');
 
-router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),RegisterValidator, async function (req, res, next) {
+router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),RegisterValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -57,7 +57,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
       res.status(500).send(err)
    }
 });
-router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]),RegisterValidator, async function (req, res, next) {
+router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]),RegisterValidator, async function (req, res) {
    try {
 
       const errors = validationResult(req);
@@ -100,7 +100,7 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),UpdateProfileValidator, async function (req, res, next) {
+router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),UpdateProfileValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -133,7 +133,7 @@ router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorizat
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),UpdateProfileValidator ,async function (req, res, next) {
+router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),UpdateProfileValidator ,async function (req, res) {
    try {
       const errors = validationResult(req);
    if (!errors.isEmpty()) {

@@ -1,4 +1,4 @@
-const { check, body, param } = require("express-validator")
+const { check, body } = require("express-validator")
 const ChangePasswordValidator = [
     check("current", "current passsowrd is required").notEmpty(),
     check("new", "new passsword should be greater than 6 charaters").isLength({ min: 6 }),
