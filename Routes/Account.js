@@ -323,25 +323,29 @@ router.post('/resetpassword/:uid', Auth.authenticateToken, Auth.CheckAuthorizati
 //reset password using token
 router.put('/resetpassword', ResetPasswordValidator,
    async (req, res) => {
-
       const errors = validationResult(req);
+      let uid = null;
       if (!errors.isEmpty()) {
          return res.status(400).json({ errors: errors.array() });
       }
       try {
-         let uid = Auth.authenticatePrToken(req.body.token).uid
-         console.log(uid)
+         uid = Auth.authenticatePrToken(req.body.token).uid
+      } catch (err) {
+         return res.status(410).send("link has been expired");
+      }
+      try {
+
          let result = await user.findOneAndUpdate({ _id: uid, }, { password: req.body.new })
          if (result) {
             await RFT.deleteMany({ userid: uid })
-            return res.status(200).send()
+            return res.status(200).send("password has been reset sucessfully")
          }
          else {
             return res.status(404).send("user not found")
          }
       }
       catch (err) {
-         return res.status(410).send("link has been expired");
+         return res.status(500).send();
       }
 
    })

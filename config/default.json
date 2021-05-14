@@ -18,8 +18,8 @@
     },
     "app": {
         "BlockChain_Enable": false,
-        "verification_url": "http://certifis.herokuapp.com/verification/",
-        "reset_url": "http://certifis.herokuapp.com/verification",
+        "verification_url": "http://localhost:8080/verification/",
+        "reset_url": "http://localhost:8080/reset-password",
         "reset_url_expiry": 300,
         "debugging": false,
         "TokenExpiry": "2h"
