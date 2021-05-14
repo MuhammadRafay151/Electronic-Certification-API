@@ -6,11 +6,18 @@ const Roles = require('../js/Roles')
 const organization = require('../models/organization')
 const RFT = require('../models/tokens');
 const { ChangePasswordValidator, ResetPasswordValidator } = require("../Validations")
-const { validationResult } = require('express-validator');
+const { RegisterValidator, UpdateProfileValidator, LoginValidator } = require("../Validations")
+const { validationResult } = require('express-validator')
 const config = require('config');
 const { SendMail } = require('../js/nodemailer');
-router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
+
+router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),RegisterValidator, async function (req, res) {
    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+
       var org = await organization.findOne({ _id: req.params.orgid })
       var TotalEnroll = await user.find({ "organization.id": req.params.orgid }).countDocuments()
       var roles = []
@@ -50,8 +57,14 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
       res.status(500).send(err)
    }
 });
-router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]), async function (req, res, next) {
+router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]),RegisterValidator, async function (req, res) {
    try {
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+
       var org = await organization.findOne({ _id: req.user.org_id })
       var TotalEnroll = await user.find({ "organization.id": req.user.org_id }).countDocuments()
       if (org) {
@@ -87,8 +100,13 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async function (req, res, next) {
+router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),UpdateProfileValidator, async function (req, res) {
    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+
       let ModifiedUser = {
          name: req.body.name,
          email: req.body.email.toLowerCase(),
@@ -115,8 +133,12 @@ router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorizat
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), async function (req, res, next) {
+router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),UpdateProfileValidator ,async function (req, res) {
    try {
+      const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+   }
       let ModifiedUser = {
          name: req.body.name,
          email: req.body.email.toLowerCase(),
@@ -142,9 +164,12 @@ router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Ro
       res.status(500).send(err)
    }
 });
-router.post('/login', async function (req, res) {
-
+router.post('/login',LoginValidator, async function (req, res) {
    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
       var response = await user.findOne({ email: req.body.email, password: req.body.password })
       if (response == null) {
          return res.status(401).json({ message: "Invalid username or password" })
@@ -349,4 +374,5 @@ router.put('/resetpassword', ResetPasswordValidator,
       }
 
    })
+
 module.exports = router

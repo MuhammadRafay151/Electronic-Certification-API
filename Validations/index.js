@@ -20,17 +20,78 @@ const ResetPasswordValidator = [
     }),
     check("token", "reset token is required").notEmpty(),
 ]
-const CountValidator = [
-    body("count", "count is required").isInt(),
-    body("count", "count is required").notEmpty(),
-]
 const NotificationValidator = [
     body("ids", "ids is required").notEmpty(),
     body("ids", "ids must be an array").isArray({ min: 1 }),
 ]
+const CountValidator = [
+    body("count", "count is required").isInt(),
+    body("count", "count is required").notEmpty(),
+]
+const CertificateValidator = [
+    check("name", "Name is required").notEmpty(),
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+    check("template_id", "TemplateID is required").notEmpty(),
+]
+
+const BatchValidator = [
+
+    check("batch_name", "Batch Name is required").notEmpty(),
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+    check("template_id", "TemplateID is required").notEmpty(),
+
+]
+
+const UpdateBatchValidator = [
+
+    check("title", "Title is required").notEmpty(),
+    check("description", "Description is required").notEmpty(),
+
+]
+
+
+const RegisterValidator = [
+    body("name", "Name is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+    body("password", "password is required").notEmpty(),
+    body("phone", "Invalid phone number").isNumeric(),
+
+
+]
+
+const UpdateProfileValidator = [
+    body("name", "Name is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+    body("phone", "Invalid phone number").isNumeric(),
+]
+
+const LoginValidator = [
+    body("password", "password is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+]
+
+const OrgniazationValidator = [
+    body("name", "Name is required").notEmpty(),
+    body("email", "email is required").notEmpty(),
+    body("email", "Invalid email address").isEmail(),
+    body("phone", "Invalid phone number").isNumeric(),
+  
+]
+
 module.exports = {
-    ChangePasswordValidator,
-    CountValidator,
+    ChangePasswordValidator, ResetPasswordValidator,
     NotificationValidator,
-    ResetPasswordValidator
+    CountValidator,
+    CertificateValidator,
+    BatchValidator,
+    UpdateBatchValidator,
+    RegisterValidator,
+    UpdateProfileValidator,
+    LoginValidator,
+    OrgniazationValidator
 }

@@ -4,6 +4,10 @@ const router = express.Router()
 const cert = require('../models/certificate');
 const user = require('../models/user')
 const files = require('../models/files')
+const { CertificateValidator } = require("../Validations")
+const { validationResult } = require('express-validator')
+
+
 var multer = require('multer')
 const upload = multer({
     limits: {
@@ -23,7 +27,12 @@ const { SingleSearch } = require("../js/search")
 const { SingleCertSort } = require("../js/sort")
 const path = require('path')
 const cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload,CertificateValidator, async (req, res) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       return res.status(400).json({ errors: errors.array() });
+    }
 
     var u1 = await user.findById(req.user.uid)
     var logo = new files({
@@ -66,8 +75,15 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
     }
     //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
-router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, async (req, res) => {
+router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload,CertificateValidator, async (req, res) => {
+  
+   
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+           return res.status(400).json({ errors: errors.array() });
+        }
+
         var u1 = await user.findById(req.user.uid)
         var temp = {
             title: req.body.title,

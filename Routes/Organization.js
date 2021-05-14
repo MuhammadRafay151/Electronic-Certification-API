@@ -5,7 +5,15 @@ var pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
 const auth = require('../Auth/Auth')
 const user = require('../models/user');
-router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+const { OrgniazationValidator } = require("../Validations")
+const { validationResult } = require('express-validator')
+router.post('/', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]),OrgniazationValidator, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       return res.status(400).json({ errors: errors.array() });
+    }
+
+    
     var org = new organization({
         name: req.body.name,
         email: req.body.email,
@@ -37,7 +45,13 @@ router.put('/togglestatus', auth.authenticateToken, auth.CheckAuthorization([Rol
     }
 
 })
-router.put('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+router.put('/:id', auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]),OrgniazationValidator, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       return res.status(400).json({ errors: errors.array() });
+    }
+
+    
     try {
         let org = await organization.findOneAndUpdate({ _id: req.params.id }, {
             name: req.body.name,
