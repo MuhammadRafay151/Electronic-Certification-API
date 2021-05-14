@@ -8,7 +8,6 @@ const ChangePasswordValidator = [
         }
         return true;
     }),
-    check("token", "reset token is required").notEmpty(),
 ]
 const ResetPasswordValidator = [
     check("new", "new passsword should be greater than 6 charaters").isLength({ min: 6 }),
@@ -34,7 +33,6 @@ const CertificateValidator = [
     check("description", "Description is required").notEmpty(),
     check("template_id", "TemplateID is required").notEmpty(),
 ]
-
 const BatchValidator = [
 
     check("batch_name", "Batch Name is required").notEmpty(),
@@ -43,15 +41,12 @@ const BatchValidator = [
     check("template_id", "TemplateID is required").notEmpty(),
 
 ]
-
 const UpdateBatchValidator = [
 
     check("title", "Title is required").notEmpty(),
     check("description", "Description is required").notEmpty(),
 
 ]
-
-
 const RegisterValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
@@ -61,20 +56,17 @@ const RegisterValidator = [
 
 
 ]
-
 const UpdateProfileValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
     body("phone", "Invalid phone number").isNumeric(),
 ]
-
 const LoginValidator = [
     body("password", "password is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
 ]
-
 const OrgniazationValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
