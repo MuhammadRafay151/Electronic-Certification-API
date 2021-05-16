@@ -53,8 +53,6 @@ const RegisterValidator = [
     body("email", "Invalid email address").isEmail(),
     body("password", "password is required").notEmpty(),
     body("phone", "Invalid phone number").isNumeric(),
-
-
 ]
 const UpdateProfileValidator = [
     body("name", "Name is required").notEmpty(),
