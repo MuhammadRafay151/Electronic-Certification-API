@@ -52,7 +52,9 @@ const RegisterValidator = [
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
     body("password", "password is required").notEmpty(),
-    body("phone", "Invalid phone number").isNumeric(),
+    body("phone", "Invalid phone number").optional({ checkFalsy: true }).isNumeric(),
+    body("phone", "Phone Number should be 10 digit long").optional({ checkFalsy: true }).isLength({ min: 10, max:10 }),
+
 
 
 ]
@@ -60,7 +62,8 @@ const UpdateProfileValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
-    body("phone", "Invalid phone number").isNumeric(),
+    body("phone", "Invalid phone number").optional({ checkFalsy: true }).isNumeric(),
+    body("phone", "Phone Number should be 10 digit long").optional({ checkFalsy: true }).isLength({ min: 10, max:10 }),
 ]
 const LoginValidator = [
     body("password", "password is required").notEmpty(),
@@ -71,7 +74,14 @@ const OrgniazationValidator = [
     body("name", "Name is required").notEmpty(),
     body("email", "email is required").notEmpty(),
     body("email", "Invalid email address").isEmail(),
+    body("phone", "Phone Number is required").notEmpty(),
     body("phone", "Invalid phone number").isNumeric(),
+    body("phone", "Phone Number should be 10 digit long").isLength({ min: 10, max:10 }),
+    body("country_code", "Country Code is required").notEmpty(),
+    body("address", "Address is required").notEmpty(),
+
+
+
   
 ]
 
