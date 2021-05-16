@@ -7,22 +7,47 @@ const { ObjectID } = require("mongodb")
 const { NotificationValidator } = require("../Validations");
 const { validationResult } = require('express-validator');
 const NotificationHandler = require("../js/NotificationHandler");
+const { Private, Public } = require("../Constants/");
 router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin,]),
     async (req, res) => {
         try {
             let response = await Notification.aggregate([
-                { $match: { organizationId: new ObjectID(req.user.org_id) } },
                 {
-                    $project: {
-                        date: 1,
-                        message: 1,
-                        Isread: {
-                            $cond: [{ $in: [new ObjectID(req.user.uid), "$seenBy"] }, true, false]
+                    $facet: {
+                        "private": [
+                            { $match: { organizationId: new ObjectID(req.user.org_id), audience: Private, userId: new ObjectID(req.user.uid) } },
+                            {
+                                $project: {
+                                    date: 1,
+                                    message: 1,
+                                    Isread: {
+                                        $cond: [{ $in: [new ObjectID(req.user.uid), "$seenBy"] }, true, false]
 
-                        },
+                                    },
 
+                                }
+                            },
+                        ],
+                        "public": [
+                            { $match: { organizationId: new ObjectID(req.user.org_id), audience: Public, userId: { $ne: new ObjectID(req.user.uid) } } },
+                            {
+                                $project: {
+                                    date: 1,
+                                    message: 1,
+                                    Isread: {
+                                        $cond: [{ $in: [new ObjectID(req.user.uid), "$seenBy"] }, true, false]
+
+                                    },
+
+                                }
+                            },
+                        ]
                     }
                 },
+                {$project:{"result": {$concatArrays:["$private","$public"]}}},
+                {$unwind:{path:"$result"}},
+                {$replaceRoot:{newRoot:"$result"}},
+                { $sort : { date : -1 } }
             ])
             response = { list: response, count: 0 }
             res.json(response);
@@ -35,7 +60,7 @@ router.get('/unread/count', Auth.authenticateToken, Auth.CheckAuthorization([Rol
     async (req, res) => {
         try {
             let response = await NotificationHandler.UnReadCount(req.user);
-            res.json({ count: response });
+            res.json({ count: response[0].TotalCount });
 
         } catch (err) {
             console.log(err)

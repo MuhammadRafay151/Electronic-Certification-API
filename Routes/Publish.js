@@ -42,7 +42,11 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
                 let crt = await cert.findOneAndUpdate({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
                 if (crt) {
                     let message = `${crt.title} certificate with id: ${crt._id} has been published`;
-                    await NotificationHandler.NewNotification(req.user, message, Constants.Private);
+                    let message2 = `${req.user.name} has published the certificate having title: ${crt.title} & id: ${crt._id}`;
+                    await Promise.all([
+                        await NotificationHandler.NewNotification(req.user, message, Constants.Private),
+                        await NotificationHandler.NewNotification(req.user, message2, Constants.Public)
+                    ])
                     let unread = await NotificationHandler.UnReadCount(req.user);
                     new SocketSingleton().emitToUserId(req.user.uid, "NotificationAlert", { count: unread });
                     res.status(200).send(message)
