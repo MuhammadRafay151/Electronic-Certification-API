@@ -47,8 +47,7 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
                         await NotificationHandler.NewNotification(req.user, message, Constants.Private),
                         await NotificationHandler.NewNotification(req.user, message2, Constants.Public)
                     ])
-                    let unread = await NotificationHandler.UnReadCount(req.user);
-                    new SocketSingleton().emitToUserId(req.user.uid, "NotificationAlert", { count: unread });
+                    new SocketSingleton().emitToRoom(req.user.org_id, "NotificationAlert", { count: 1 });
                     res.status(200).send(message)
                 } else {
                     await CountHandler.IncreaseCount(req.user.org_id, 1);
@@ -100,10 +99,13 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
                     }
                     try {
                         await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false }, { $set: { publish: publish } })
-                        let message = `${bt.batch_name} batch with id: ${bt._id} has been published`;
-                        await NotificationHandler.NewNotification(req.user, message, Constants.Private);
-                        let unread = await NotificationHandler.UnReadCount(req.user);
-                        new SocketSingleton().emitToUserId(req.user.uid, "NotificationAlert", { count: unread });
+                        let message = `${bt.title} batch with id: ${bt._id} has been published`;
+                        let message2 = `${req.user.name} has published the batch having title: ${bt.title} & id: ${bt._id}`;
+                        await Promise.all([
+                            await NotificationHandler.NewNotification(req.user, message, Constants.Private),
+                            await NotificationHandler.NewNotification(req.user, message2, Constants.Public)
+                        ])
+                        new SocketSingleton().emitToRoom(req.user.org_id, "NotificationAlert", { count: 1 });
                         res.send(message)
                     } catch (err) {
                         await CountHandler.IncreaseCount(req.user.org_id, bcert);

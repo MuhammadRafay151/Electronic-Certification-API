@@ -5,6 +5,7 @@ const cert = require('../models/certificate')
 const files = require('../models/files')
 const { singleInvoke, batchInvoke } = require('../BlockChain/invoke')
 const config = require('config')
+const NotificationHandler= require("./NotificationHandler");
 async function PublishBatch(obj) {
     try {
         let publish = {
@@ -40,15 +41,13 @@ async function PublishBatch(obj) {
         if (config.get("app.debugging") === true) {
             process.send({ _id: bt._id,  message: "Batch has been published to the blockchain", debugging: true });
         }
+        let message = `${bt.title} batch with id: ${bt._id} has been published`;
+        let message2 = `${obj.user.name} has published the batch having title: ${bt.title} & id: ${bt._id}`;
+        await Promise.all([
+            await NotificationHandler.NewNotification(obj.user, message, Constants.Private),
+            await NotificationHandler.NewNotification(obj.user, message2, Constants.Public)
+        ])
         return true
-        // let st = JSON.stringify(CryptoCert)
-        // let te=JSON.parse(st)
-        // console.log(te[0]._id)
-        // let fs = require('fs');
-        // fs.writeFile('batch.json', st, function (err) {
-        //     if (err) return console.log(err);
-        //     console.log('data writed to json file');
-        // });
     }
     catch (err) {
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': true } })
@@ -84,11 +83,12 @@ async function PublishSingle(obj) {
             let temp = { _id: crt._id, message: "Successfully published on blockchain", debugging: true };
             process.send(temp);
         }
-        // let fs = require('fs');
-        // fs.writeFile('single.pdf', Buffer.from(CryptoCert.pdf,'base64'), function (err) {
-        //     if (err) return console.log(err);
-        //     console.log('Hello World > helloworld.txt');
-        // });
+        let message = `${crt.title} certificate with id: ${crt._id} has been published`;
+        let message2 = `${obj.user.name} has published the certificate having title: ${crt.title} & id: ${crt._id}`;
+        await Promise.all([
+            await NotificationHandler.NewNotification(obj.user, message, Constants.Private),
+            await NotificationHandler.NewNotification(obj.user, message2, Constants.Public)
+        ])
         return true;
     }
     catch (err) {
@@ -98,9 +98,5 @@ async function PublishSingle(obj) {
     }
 
 }
-function SendNotfication() {
-    console.log("Processing completed at", Date.now())
-    // let io = obj.app.get('socketio');
-    // io.sockets.to(obj.user.org_id).emit("message", `${obj.user.name} has Publish ${bt.batch_name} batch`);
-}
+
 module.exports = { PublishBatch, PublishSingle }
