@@ -70,12 +70,13 @@ router.get('/unread/count', Auth.authenticateToken, Auth.CheckAuthorization([Rol
 router.patch('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Issuer, Roles.Admin, Roles.SuperAdmin]),
     NotificationValidator,
     async (req, res) => {
+        
         try {
             let errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-            await Notification.updateOne({ _id: { $in: req.body.ids }, organizationId: req.user.org_id }, {
+            await Notification.updateMany({ _id: { $in: req.body.ids }, organizationId: req.user.org_id }, {
                 $addToSet: { seenBy: req.user.uid }
             })
             res.status(200).send()
