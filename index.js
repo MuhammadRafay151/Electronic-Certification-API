@@ -128,7 +128,7 @@ app.set('SocketMap', SocketMap);
 //db connection
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, () => { console.log("Connected to db") })
+mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, (e) => { console.log(e,"Connected to db") })
 server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")

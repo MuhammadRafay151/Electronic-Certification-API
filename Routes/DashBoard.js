@@ -9,6 +9,7 @@ const bcert = require('../models/batch_certificates')
 const auth = require('../Auth/Auth')
 const Roles = require('../js/Roles');
 
+
 router.get("/userstats", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
     var x = await user.aggregate([{
         $facet: {
@@ -186,14 +187,28 @@ async function BatchPublicationHistorys(org_id) {
     return TotalBatchCertPublications
 }
 async function PublishedCertCount(org_id) {
-    var TotalSinglePublications = await cert.find({ 'issuedby.org_id': org_id, 'publish.status': true }).countDocuments();
-    var PublishedBatches = await batch.find({ "createdby.org_id": org_id, 'publish.status': true });
-    var TotalBatchPublications = 0
-    for (var x = 0; x < PublishedBatches.length; x++) {
-        var temp = await bcert.find({ batch_id: PublishedBatches[x]._id }).countDocuments();
-        TotalBatchPublications += temp
-    }
-    var count = TotalSinglePublications + TotalBatchPublications
+    let requests = [
+        await cert.find({ 'issuedby.org_id': org_id, 'publish.status': true }).countDocuments(),
+        await batch.aggregate([
+            { $match: { "createdby.org_id": org_id, 'publish.status': true } },
+            {
+                $lookup:
+                {
+                    from: "batch_certificates",
+                    localField: "_id",
+                    foreignField: "batch_id",
+                    as: "bcerts"
+                }
+            },
+            { $unwind: "$bcerts" },
+            { $group: { _id: null, count: { $sum: 1 } } },
+            { $project: { _id: 0 } }
+        ])
+    ]
+    let response = await Promise.all(requests);
+    let TotalSinglePublications = response[0];
+    let TotalBatchPublications = response[1][0].count;
+    let count = TotalSinglePublications + TotalBatchPublications
     return count
 }
 async function OrganizationStats() {
