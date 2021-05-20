@@ -18,8 +18,8 @@
     },
     "app": {
         "BlockChain_Enable": false,
-        "verification_url": "http://localhost:8080/verification/",
-        "reset_url": "http://localhost:8080/reset-password",
+        "verification_url": "https://mr-devs.ml/verification/",
+        "reset_url": "https://mr-devs.ml/reset-password",
         "reset_url_expiry": 300,
         "debugging": false,
         "TokenExpiry": "2h"
