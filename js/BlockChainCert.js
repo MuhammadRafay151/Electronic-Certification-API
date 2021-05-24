@@ -9,6 +9,8 @@ async function GetBlockChainCert(crt, publish) {
         expiry_date: crt.expiry_date,
         instructor_name: crt.instructor_name,
         template_id: crt.template_id,
+        default_template: cert.default_template,
+        template: cert.template,
         publish: publish,
         logo: crt.logo,
         description: crt.description,

@@ -8,6 +8,8 @@ router.post('/certificates', async (req, res) => {
     if (config.get("app.BlockChain_Enable") === true) {
         return res.status(503).send();
     }
+    if (!req.body.email)
+        return res.status(400).json({})
     res.send("we are searching your certificates you can check the response on your provided email in a while.")
     let promise = [
         cert.find({ email: req.body.email }, { _id: 1, title: 1 }),

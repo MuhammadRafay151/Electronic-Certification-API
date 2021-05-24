@@ -3,20 +3,11 @@
     <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt=""
         class="logo" />
 
-    <h3 class="t">
-        <%= data.title %>
-    </h3>
-
-    <p class="desc ">
-        It is to certify that <br>
-        <b>
-            <%= data.name%>
-        </b> <br>
-        <%= data.description %>
-    </p>
-
+    <div class="template">
+        <%- data.template %>
+    </div>
     <p class="p2 ">
-        Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
+        issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
 
     </p>
 
@@ -45,31 +36,20 @@
         object-fit: contain;
     }
 
-    .t {
+    .template {
         position: absolute;
-        top: 190px;
+        top: 30%;
+        left: 20px;
         color: black;
         left: 0;
         right: 0;
-        width: 24.7cm;
+        font-size: 22px;
+        height: 555px;
         /* Assign a value */
+        width: 85%;
+        word-wrap: break-word;
         margin: auto;
-        font-family: 'Century Gothic';
-        font-size: 50px;
-        text-transform: uppercase;
-    }
-
-    .desc {
-        position: absolute;
-        top: 260px;
-        color: black;
-        left: 0;
-        right: 0;
-        width: 24.7cm;
-        margin: auto;
-        font-family: 'Century Gothic';
-        font-size: 20px;
-        text-align: center;
+        font-family: "Century Gothic";
     }
 
     .p2 {
@@ -104,7 +84,6 @@
         top: 610px;
         right: 2.56cm;
         object-fit: contain;
-
     }
 
     .container1 {

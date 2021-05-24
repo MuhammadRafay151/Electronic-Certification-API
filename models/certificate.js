@@ -4,7 +4,11 @@ const certificate = mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
+    default_template: {
+        type: String,
+        required: true
+    },
+    template: {
         type: String,
         required: true
     },

@@ -30,14 +30,16 @@ const CountValidator = [
 const CertificateValidator = [
     check("name", "Name is required").notEmpty(),
     check("title", "Title is required").notEmpty(),
-    check("description", "Description is required").notEmpty(),
+    check("default_template", "default_template is required").notEmpty(),
+    check("template", "default_template is required").notEmpty(),
     check("template_id", "TemplateID is required").notEmpty(),
 ]
 const BatchValidator = [
 
     check("batch_name", "Batch Name is required").notEmpty(),
     check("title", "Title is required").notEmpty(),
-    check("description", "Description is required").notEmpty(),
+    check("default_template", "default_template is required").notEmpty(),
+    check("template", "default_template is required").notEmpty(),
     check("template_id", "TemplateID is required").notEmpty(),
 
 ]

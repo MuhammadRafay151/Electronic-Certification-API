@@ -4,11 +4,15 @@ const batch = mongoose.Schema({
         type: String,
         required: true
     },
-    batch_name: {
+    default_template: {
         type: String,
         required: true
     },
-    description: {
+    template: {
+        type: String,
+        required: true
+    },
+    batch_name: {
         type: String,
         required: true
     },

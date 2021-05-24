@@ -15,7 +15,7 @@ const upload = multer({
     },
     fileFilter: function (req, file, callback) {
         var ext = path.extname(file.originalname);
-        if (ext !== '.png' && ext !== '.jpg'  && ext !== '.jpeg') {
+        if (ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg') {
             return callback(new Error('Only images are allowed'))
         }
         callback(null, true)
@@ -27,11 +27,10 @@ const { SingleSearch } = require("../js/search")
 const { SingleCertSort } = require("../js/sort")
 const path = require('path')
 const cpUpload = upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'signature', maxCount: 1 }])
-router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload,CertificateValidator, async (req, res) => {
-
+router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, CertificateValidator, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-       return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ errors: errors.array() });
     }
 
     var u1 = await user.findById(req.user.uid)
@@ -47,7 +46,8 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
     signature = await signature.save()
     var obj = {
         title: req.body.title,
-        description: req.body.description,
+        default_template: req.body.default_template,
+        template: req.body.template,
         name: req.body.name,
         email: req.body.email.toLowerCase(),
         instructor_name: req.body.instructor_name,
@@ -75,19 +75,20 @@ router.post("/", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, R
     }
     //we need to set this process to transaction when replicaset is established in future so we can make sure data consistency
 })
-router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload,CertificateValidator, async (req, res) => {
-  
-   
+router.put("/:id", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), cpUpload, CertificateValidator, async (req, res) => {
+
+
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-           return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ errors: errors.array() });
         }
 
         var u1 = await user.findById(req.user.uid)
         var temp = {
             title: req.body.title,
-            description: req.body.description,
+            default_template: req.body.default_template,
+            template: req.body.template,
             expiry_date: req.body.expiry_date,
             name: req.body.name,
             email: req.body.email.toLowerCase(),

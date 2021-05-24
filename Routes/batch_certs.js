@@ -5,6 +5,7 @@ const batch_cert = require('../models/batch_certificates')
 const batch = require('../models/batch')
 const Roles = require('../js/Roles')
 const pagination = require('../js/pagination');
+const { ProcessData } = require("../js/CertificatePdf");
 //api handle requests to manipulate certificates in batches.
 router.get("/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
@@ -89,30 +90,32 @@ router.delete("/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization(
     }
 })
 router.get("/view/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
-    var b1 = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id })
-    var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
+    var b1 = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.user.org_id }).lean()
+    var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id }).lean()
     if (b1 && bcert) {
-        delete b1._doc.created_date
-        b1._doc.issue_date = bcert.issue_date
-        b1._doc._id = bcert._id
-        b1._doc.name = bcert.name
-        b1._doc.email = bcert.email
+        delete b1.created_date
+        b1.issue_date = bcert.issue_date
+        b1._id = bcert._id
+        b1.name = bcert.name
+        b1.email = bcert.email
         //Object.assign({},b1)
+        ProcessData(b1);
         res.json(b1)
     } else {
         res.status(404).send()
     }
 })
 router.get("/view/:org_id/:id/:batch_id", Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    var b1 = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.params.org_id })
-    var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id })
+    var b1 = await batch.findOne({ _id: req.params.batch_id, 'createdby.org_id': req.params.org_id }).lean()
+    var bcert = await batch_cert.findOne({ _id: req.params.id, batch_id: req.params.batch_id }).lean()
     if (b1 && bcert) {
-        delete b1._doc.created_date
-        b1._doc.issue_date = bcert.issue_date
-        b1._doc._id = bcert._id
-        b1._doc.name = bcert.name
-        b1._doc.email = bcert.email
+        delete b1.created_date
+        b1.issue_date = bcert.issue_date
+        b1._id = bcert._id
+        b1.name = bcert.name
+        b1.email = bcert.email
         //Object.assign({},b1)
+        ProcessData(b1);
         res.json(b1)
     } else {
         res.status(404).send()

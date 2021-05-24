@@ -1,32 +1,31 @@
 <div class="container1 ">
-  <img
-    src="<%= img %>"
-    class="cert" alt="">
-  <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt="" class="logo" />
 
-  <h3 class="t">
-    <%= data.title %>
-   
-  </h3>
-  <p class="desc ">
-    It is to certify that <b> <%= data.name%></b> <%= data.description %>
-  </p>
+  <img src="<%= img %>" class="cert" alt="">
+
+  <img src="data:<%= data.logo.mimetype %>;base64,<%= data.logo.image %>" width="150" height="100" alt=""
+    class="logo" />
+
+  <div class="template">
+    <%- data.template %>
+  </div>
+
   <p class="p2 ">
-   Publish Date: <%=  new Date(data.publish.publish_date).toLocaleDateString() %>
-  
+    issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
   </p>
+
   <p class="p3 ">
     verfication code: <%=data._id %>
   </p>
+
   <div>
     <p class="sign">Signature: _____________________</p>
-    
-    <img src="data:<%= data.signature.mimetype %>;base64,<%= data.signature.image %>" width="150" height="100" alt="" class="isign" />
+
+    <img src="data:<%= data.signature.mimetype %>;base64,<%= data.signature.image %>" width="150" height="100" alt=""
+      class="isign" />
   </div>
 
 </div>
 
-</div>
 <style>
   .cert {
     width: 29.7cm;
@@ -40,7 +39,7 @@
     object-fit: contain;
   }
 
-   .sign {
+  .sign {
     position: absolute;
     top: 730px;
     left: 840px;
@@ -54,15 +53,19 @@
     object-fit: contain;
 
   }
-  .t {
+
+  .template {
     position: absolute;
-    top: 160px;
+    top: 20%;
+    left: 20px;
     color: black;
     left: 0;
     right: 0;
-
-    height: 500px;
+    font-size: 22px;
+    height: 555px;
     /* Assign a value */
+    width: 802px;
+    word-wrap: break-word;
     margin: auto;
   }
 
@@ -80,24 +83,6 @@
     overflow-y: hidden;
   }
 
-  .desc {
-    position: absolute;
-    top: 210px;
-    color: black;
-    left: 0;
-    right: 0;
-
-    width: 600px;
-    margin: auto;
-  }
-
-  .p2 {
-    position: absolute;
-    top: 700px;
-    color: black;
-    left: 30px;
-
-  }
 
   .p3 {
     position: absolute;
@@ -105,12 +90,16 @@
     color: black;
     left: 30px;
   }
+
   @media print {
 
-html, body {
-  height:100vh; 
-  margin: 0 !important; 
-  padding: 0 !important;
-  overflow: hidden;
-}}
+    html,
+    body {
+      height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+    }
+
+  }
 </style>
