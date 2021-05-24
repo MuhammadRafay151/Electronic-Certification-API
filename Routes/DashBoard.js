@@ -207,7 +207,7 @@ async function PublishedCertCount(org_id) {
     ]
     let response = await Promise.all(requests);
     let TotalSinglePublications = response[0];
-    let TotalBatchPublications = response[1][0].count;
+    let TotalBatchPublications = response[1].length > 0 ? response[1][0].count : 0;
     let count = TotalSinglePublications + TotalBatchPublications
     return count
 }

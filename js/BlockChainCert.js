@@ -1,5 +1,4 @@
 const cert_pdf = require('../js/CertificatePdf')
-const Image = require('../js/Image')
 async function GetBlockChainCert(crt, publish) {
     var pdf_base64 = await cert_pdf.GetPdf_Base64(crt)
     var BlockChainCert = {
