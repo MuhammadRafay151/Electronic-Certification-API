@@ -40,7 +40,7 @@ async function PublishCertificate(cert, userid) {
     // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
     // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR12', 'Dave')
 
-    var t = await contract.submitTransaction('PublishCertificate', JSON.stringify(cert));
+    await contract.submitTransaction('PublishCertificate', JSON.stringify(cert));
     // console.log('Transaction has been submitted');
     // Disconnect from the gateway.
     await gateway.disconnect();
@@ -75,7 +75,7 @@ async function PublishBatch(batch, userid) {
     // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
     // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR12', 'Dave')
 
-    var t = await contract.submitTransaction('PublishBatch', JSON.stringify(batch));
+    await contract.submitTransaction('PublishBatch', JSON.stringify(batch));
     // console.log('Transaction has been submitted');
     // Disconnect from the gateway.
     await gateway.disconnect();
