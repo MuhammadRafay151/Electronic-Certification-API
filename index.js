@@ -96,7 +96,7 @@ if (app.get("BlockChain_Enable")) {
     if (obj.debugging) {
       socketEmit.SendLogs(io, obj)
     }
-    if (obj.IsSuccess) {
+    if ('IsSuccess' in obj) {
       if (obj.IsSuccess === true) {
         s1.emitToRoom(obj.user.org_id, "NotificationAlert", { count: 1 });
         s1.emitToUserId(obj.user.uid, "message", `certificate with id ${obj.certid}  has been published`);
@@ -110,7 +110,7 @@ if (app.get("BlockChain_Enable")) {
     if (obj.debugging) {
       socketEmit.SendLogs(io, obj)
     }
-    if (obj.IsSuccess) {
+    if ('IsSuccess' in obj) {
       if (obj.IsSuccess === true) {
         s1.emitToRoom(obj.user.org_id, "NotificationAlert", { count: 1 });
         s1.emitToUserId(obj.user.uid, "message", `batch with id ${obj.batchid} has been published`);

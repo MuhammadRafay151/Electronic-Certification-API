@@ -12,6 +12,7 @@ const { StatusCodeException } = require('../Exception/StatusCodeException');
 const NotificationHandler = require("../js/NotificationHandler");
 const Constants = require("../Constants");
 const SocketSingleton = require("../js/Socket");
+const LogHandler = require("../js/logsHandler");
 router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin, Roles.Issuer]), async (req, res) => {
     try {
         await CountHandler.ReduceCount(req.user.org_id, 1);
@@ -30,6 +31,7 @@ router.post("/single", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Ad
                     ct.message = "send to message queue";
                     io.to("debugging").emit("log", ct);
                 }
+                await LogHandler.Log(JSON.stringify(ct), Constants.Pending);
                 await MsgBroker.send(true, { user: req.user, certid: req.body.id })
 
             }
@@ -84,6 +86,7 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
                             bt.message = "send to message queue";
                             io.to("debugging").emit("log", bt);
                         }
+                        await LogHandler.Log(JSON.stringify(bt), Constants.Pending);
                         await MsgBroker.send(false, { user: req.user, batchid: req.body.id })
                         res.send("Processing started we will notify u soon")
                     }
