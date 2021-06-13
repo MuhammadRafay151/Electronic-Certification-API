@@ -12,6 +12,9 @@ const Logs = mongoose.Schema({
     status: {
         type: String,
         enum: [Success, Error, Pending],
+    },
+    message: {
+        type: String,
     }
 });
 module.exports = mongoose.model("Logs", Logs);

@@ -5,7 +5,10 @@ const cert = require('../models/certificate')
 const files = require('../models/files')
 const { singleInvoke, batchInvoke } = require('../BlockChain/invoke')
 const config = require('config')
-const NotificationHandler= require("./NotificationHandler");
+const NotificationHandler = require("./NotificationHandler");
+const LogHandler = require("./logsHandler");
+const Constants = require('../Constants');
+const CountHandler = require('./CountHandler');
 async function PublishBatch(obj) {
     try {
         let publish = {
@@ -33,24 +36,33 @@ async function PublishBatch(obj) {
         let CryptoCert = await BlockChainCert.ProcessBatchCerts(bt, bcert, publish)
         if (config.get("app.debugging") === true) {
             process.send({ _id: bt._id, candidates: [...CryptoCert], message: "Candidates certificates after merging", debugging: true });
-            process.send({ _id: bt._id,  message: "Sending batch to the blockchain", debugging: true });
-       
+            process.send({ _id: bt._id, message: "Sending batch to the blockchain", debugging: true });
+
         }
-        await batchInvoke(CryptoCert, obj.user.uid)
+        try {
+            await batchInvoke(CryptoCert, obj.user.uid)
+        } catch (err) {
+            await Promise.all([
+                CountHandler.IncreaseCount(obj.user.org_id, bcert.length),
+                LogHandler.Log(JSON.stringify(bt), Constants.Error, err)
+            ])
+            throw err
+        }
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
         if (config.get("app.debugging") === true) {
-            process.send({ _id: bt._id,  message: "Batch has been published to the blockchain", debugging: true });
+            process.send({ _id: bt._id, message: "Batch has been published to the blockchain", debugging: true });
         }
         let message = `${bt.title} batch with id: ${bt._id} has been published`;
         let message2 = `${obj.user.name} has published the batch having title: ${bt.title} & id: ${bt._id}`;
         await Promise.all([
-            await NotificationHandler.NewNotification(obj.user, message, Constants.Private),
-            await NotificationHandler.NewNotification(obj.user, message2, Constants.Public)
+            NotificationHandler.NewNotification(obj.user, message, Constants.Private),
+            NotificationHandler.NewNotification(obj.user, message2, Constants.Public),
+            LogHandler.Log(JSON.stringify(bt), Constants.Success)
         ])
         return true
     }
     catch (err) {
-        await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': true } })
+        await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
         console.log(err)
         return false
     }
@@ -77,7 +89,15 @@ async function PublishSingle(obj) {
             process.send(temp);
             process.send({ _id: crt._id, message: "Sending to blockchain", debugging: true });
         }
-        await singleInvoke(CryptoCert, obj.user.uid)
+        try {
+            await singleInvoke(CryptoCert, obj.user.uid)
+        } catch (err) {
+            await Promise.all([
+                CountHandler.IncreaseCount(obj.user.org_id, 1),
+                LogHandler.Log(JSON.stringify(crt), Constants.Error, err)
+            ])
+            throw err
+        }
         await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
         if (config.get("app.debugging") === true) {
             let temp = { _id: crt._id, message: "Successfully published on blockchain", debugging: true };
@@ -86,8 +106,10 @@ async function PublishSingle(obj) {
         let message = `${crt.title} certificate with id: ${crt._id} has been published`;
         let message2 = `${obj.user.name} has published the certificate having title: ${crt.title} & id: ${crt._id}`;
         await Promise.all([
-            await NotificationHandler.NewNotification(obj.user, message, Constants.Private),
-            await NotificationHandler.NewNotification(obj.user, message2, Constants.Public)
+            NotificationHandler.NewNotification(obj.user, message, Constants.Private),
+            NotificationHandler.NewNotification(obj.user, message2, Constants.Public),
+            LogHandler.Log(JSON.stringify(crt), Constants.Success)
+
         ])
         return true;
     }

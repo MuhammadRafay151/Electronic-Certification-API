@@ -23,6 +23,7 @@ const report = require("./Routes/Report")
 const Notification = require("./Routes/Notification")
 const Auth = require('./Auth/Auth');
 const forget = require("./Routes/forget");
+const LogHandler = require("./Routes/logs");
 const socketEmit = require('./js/socketEmit')
 const SocketSingleton = require("./js/Socket");
 const { fork } = require('child_process');
@@ -47,6 +48,7 @@ app.use("/api/report", report)
 app.use("/image", image)
 app.use("/api/notification", Notification)
 app.use("/api/forget", forget)
+app.use("/api/logs",LogHandler);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //app config loading
 const app_config = config.get("app")
@@ -64,7 +66,7 @@ io.use((socket, next) => {
   // console.log(token)
 });
 io.on('connection', socket => {
-  SocketMap[socket.user.uid] = { ...socket.user, 'socket.id': socket.id }
+  SocketMap[socket.user.uid] = { ...socket.user, socket: { id: socket.id } }
   socket.join(socket.user.org_id);
   socket.emit('message', "welcome u are connected");
   socket.on('close', () => {
@@ -94,9 +96,9 @@ if (app.get("BlockChain_Enable")) {
     if (obj.debugging) {
       socketEmit.SendLogs(io, obj)
     }
-    if (obj.IsSuccess) {
+    if ('IsSuccess' in obj) {
       if (obj.IsSuccess === true) {
-        s1.emitToRoom(req.user.org_id, "NotificationAlert", { count: 1 });
+        s1.emitToRoom(obj.user.org_id, "NotificationAlert", { count: 1 });
         s1.emitToUserId(obj.user.uid, "message", `certificate with id ${obj.certid}  has been published`);
         console.log("single published")
       } else
@@ -108,9 +110,9 @@ if (app.get("BlockChain_Enable")) {
     if (obj.debugging) {
       socketEmit.SendLogs(io, obj)
     }
-    if (obj.IsSuccess) {
+    if ('IsSuccess' in obj) {
       if (obj.IsSuccess === true) {
-        s1.emitToRoom(req.user.org_id, "NotificationAlert", { count: 1 });
+        s1.emitToRoom(obj.user.org_id, "NotificationAlert", { count: 1 });
         s1.emitToUserId(obj.user.uid, "message", `batch with id ${obj.batchid} has been published`);
       } else
         s1.emitToUserId(obj.user.uid, "message", `batch with id ${obj.batchid} failed to publish due to unkonwn error please try after some time`);
@@ -128,7 +130,7 @@ app.set('SocketMap', SocketMap);
 //db connection
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, (e) => { console.log(e,"Connected to db") })
+mongoose.connect(config.get('database.url'), { useUnifiedTopology: true, useNewUrlParser: true }, (e) => { console.log(e, "Connected to db") })
 server.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`)
   console.log("socket server connected")
