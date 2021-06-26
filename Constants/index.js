@@ -10,5 +10,5 @@ module.exports = Object.freeze({
     Pending: "Pending",
 
     //custom error codes
-    PublishFailed=1001
+    PublishFailed:1001
 })

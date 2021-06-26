@@ -89,7 +89,8 @@ async function PublishSingleBlockChain(req, res) {
             await MsgBroker.send(true, { user: req.user, certid: req.body.id })
             return res.send(`we are publishing your ${ct.title} certificate with id: ${ct._id}. You may continue what you are doing.`)
         } catch (err) {
-            throw new StatusCodeException(500, "Error in connecting with the message broker", Constants.PublishFailed)
+            await cert.updateOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
+            throw new StatusCodeException(503, "service unavailable", Constants.PublishFailed)
         }
 
     } else {
@@ -140,7 +141,8 @@ async function PublishBatchBlockChain(req, res) {
             await MsgBroker.send(false, { user: req.user, batchid: req.body.id })
             return res.send("Processing started we will notify u soon")
         } catch (err) {
-            throw new StatusCodeException(500, "cannot connect to message broker", Constants.PublishFailed)
+            await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } }).lean();
+            throw new StatusCodeException(503, "service unavailable", Constants.PublishFailed)
         }
     }
     else {
