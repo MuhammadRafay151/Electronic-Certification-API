@@ -8,4 +8,7 @@ module.exports = Object.freeze({
     Error: "Error",
     Warning: "Warning",
     Pending: "Pending",
+
+    //custom error codes
+    PublishFailed:1001
 })
