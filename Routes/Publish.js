@@ -65,7 +65,6 @@ router.post("/batch", Auth.authenticateToken, Auth.CheckAuthorization([Roles.Adm
         }
     }
 })
-//blockchain exception raised count roll back implementation remaining
 async function PublishSingleBlockChain(req, res) {
     let ct = null;
     try {
