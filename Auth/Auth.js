@@ -7,7 +7,7 @@ function authenticateToken(req, res, next) {
   if (token == null) return res.sendStatus(401) // if there isn't any token
 
   jwt.verify(token, process.env.TOKEN_SECRET.toString(), (err, user) => {
-    if (err) return res.sendStatus(403)
+    if (err) return res.sendStatus(401)
     req.user = user
     next() // pass the execution off to whatever request the client intended
   })
@@ -29,11 +29,11 @@ function AuthenticateSocket(token, socket, next) {
 
 function generateAccessToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
-  return jwt.sign(obj, process.env.TOKEN_SECRET, { expiresIn: '2d' });
+  return jwt.sign(obj, process.env.TOKEN_SECRET, { expiresIn: '15s' });
 }
 function generateRefreshToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
-  return jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+  return jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '2d' });
 }
 function generatePrToken(obj, expTime) {
   return jwt.sign(obj, process.env.PASSWORD_RESET_TOKEN, { expiresIn: expTime });
@@ -57,7 +57,6 @@ function CheckAuthorization(AllowedRoles) {
     else
       res.status('403').send()
   }
-
 }
 module.exports = {
 

@@ -11,7 +11,7 @@ const { validationResult } = require('express-validator')
 const config = require('config');
 const { SendMail } = require('../js/nodemailer');
 
-router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),RegisterValidator, async function (req, res) {
+router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), RegisterValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -57,7 +57,7 @@ router.post('/Register/:orgid', Auth.authenticateToken, Auth.CheckAuthorization(
       res.status(500).send(err)
    }
 });
-router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]),RegisterValidator, async function (req, res) {
+router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Admin]), RegisterValidator, async function (req, res) {
    try {
 
       const errors = validationResult(req);
@@ -100,7 +100,7 @@ router.post('/Register', Auth.authenticateToken, Auth.CheckAuthorization([Roles.
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]),UpdateProfileValidator, async function (req, res) {
+router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), UpdateProfileValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -133,12 +133,12 @@ router.put('/UpdateProfile/:orgid', Auth.authenticateToken, Auth.CheckAuthorizat
       res.status(500).send(err)
    }
 });
-router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]),UpdateProfileValidator ,async function (req, res) {
+router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin, Roles.Admin]), UpdateProfileValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
-   if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-   }
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
       let ModifiedUser = {
          name: req.body.name,
          email: req.body.email.toLowerCase(),
@@ -164,7 +164,7 @@ router.put('/UpdateProfile', Auth.authenticateToken, Auth.CheckAuthorization([Ro
       res.status(500).send(err)
    }
 });
-router.post('/login',LoginValidator, async function (req, res) {
+router.post('/login', LoginValidator, async function (req, res) {
    try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -210,8 +210,14 @@ router.post('/refresh_token', async function (req, res) {
          res.status(401).json({ message: "No token found" })
       } else {
          try {
-            let result = await Auth.authenticateRefreshToken(token.token)
-            let u1 = await user.findOne({ _id: result.uid })
+            let result = await Auth.authenticateRefreshToken(token.token);
+            if (result.org_id) {
+               let o1 = await organization.findOne({ _id: result.org_id });
+               if (o1.status.active === false) {
+                  throw  { message: "Organization has been disabled" };
+               }
+            }
+            let u1 = await user.findOne({ _id: result.uid });
             if (u1.status.active == true) {
                let token_data = { uid: u1._id, email: u1.email, name: u1.name, roles: u1.roles }
                if (u1.organization) {
@@ -220,12 +226,11 @@ router.post('/refresh_token', async function (req, res) {
                var token = await Auth.generateAccessToken(token_data)
                res.json({ token })
             } else {
-               await RFT.deleteOne({ token: req.body.RefreshToken })
-               res.status(403).json({ message: "Account has been disabled" })
+               throw  { message: "Account has been disabled" }
             }
          } catch (err) {
             await RFT.deleteOne({ token: req.body.RefreshToken })
-            return res.status(403).send(err)
+            return res.status(401).send(err)
          }
 
       }
