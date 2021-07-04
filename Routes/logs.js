@@ -20,6 +20,8 @@ router.get('/', Auth.authenticateToken, async (req, res) => {
     }
 })
 router.get('/docker', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    if (!req.app.get("BlockChain_Enable"))
+        return res.status(503).send("service is not avilable over non blockchain instance");
     try {
         let response = await axios({
             url: utils.fixBaseUrl(config.get('blockchain.dockerLogsURL')) + "containers/f737c8e5fc67/logs?stderr=true",

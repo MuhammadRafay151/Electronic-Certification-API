@@ -29,7 +29,7 @@ function AuthenticateSocket(token, socket, next) {
 
 function generateAccessToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
-  return jwt.sign(obj, process.env.TOKEN_SECRET, { expiresIn: '15s' });
+  return jwt.sign(obj, process.env.TOKEN_SECRET, { expiresIn: '15m' });
 }
 function generateRefreshToken(obj) {
   // expires after half and hour (1800 seconds = 30 minutes)
