@@ -4,6 +4,8 @@ const logs = require('../models/logs');
 const pagination = require('./../js/pagination');
 const Roles = require('../js/Roles')
 const axios = require('axios');
+const config = require('config');
+const utils = require('../js/utils');
 router.get('/', Auth.authenticateToken, async (req, res) => {
     try {
         let perpage = 5
@@ -20,7 +22,7 @@ router.get('/', Auth.authenticateToken, async (req, res) => {
 router.get('/docker', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         let response = await axios({
-            url: "http://192.168.174.128:5050/containers/f737c8e5fc67/logs?stderr=true",
+            url: utils.fixBaseUrl(config.get('blockchain.dockerLogsURL')) + "containers/f737c8e5fc67/logs?stderr=true",
             method: "GET",
         })
         res.json(response.data);

@@ -16,6 +16,9 @@
         "user": "certifis.cf@gmail.com",
         "pass": "certifis@123"
     },
+    "blockchain": {
+        "dockerLogsURL":"http://192.168.174.128:5050"
+    },
     "app": {
         "BlockChain_Enable": false,
         "verification_url": "https://mr-devs.ml/verification/",
