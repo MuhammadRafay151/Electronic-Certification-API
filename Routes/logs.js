@@ -2,6 +2,8 @@ const router = require("express").Router();
 const Auth = require("../Auth/Auth")
 const logs = require('../models/logs');
 const pagination = require('./../js/pagination');
+const Roles = require('../js/Roles')
+const axios = require('axios');
 router.get('/', Auth.authenticateToken, async (req, res) => {
     try {
         let perpage = 5
@@ -10,6 +12,18 @@ router.get('/', Auth.authenticateToken, async (req, res) => {
         let count = await logs.find().countDocuments();
         let response = await logs.find({}).sort({ date: -1 }).skip(pagination.Skip(pageno, perpage)).limit(perpage);
         res.json({ List: response, Count: count });
+    } catch (err) {
+        console.log(err)
+        res.status(500).send();
+    }
+})
+router.get('/docker', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
+    try {
+        let response = await axios({
+            url: "http://192.168.174.128:5050/containers/f737c8e5fc67/logs?stderr=true",
+            method: "GET",
+        })
+        res.json(response.data);
     } catch (err) {
         console.log(err)
         res.status(500).send();
