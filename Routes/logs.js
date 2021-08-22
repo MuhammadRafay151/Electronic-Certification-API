@@ -6,7 +6,7 @@ const Roles = require('../js/Roles')
 const axios = require('axios');
 const config = require('config');
 const utils = require('../js/utils');
-router.get('/', Auth.authenticateToken, async (req, res) => {
+router.get('/', Auth.authenticateToken, Auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
     try {
         let perpage = 5
         let pageno = req.query.pageno
@@ -24,7 +24,7 @@ router.get('/docker', Auth.authenticateToken, Auth.CheckAuthorization([Roles.Sup
         return res.status(503).send("service is not avilable over non blockchain instance");
     try {
         let response = await axios({
-            url: utils.fixBaseUrl(config.get('blockchain.dockerLogsURL')) + "containers/f737c8e5fc67/logs?stderr=true",
+            url: utils.fixBaseUrl(config.get('blockchain.dockerLogsURL')),
             method: "GET",
         })
         res.json(response.data);
