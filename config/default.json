@@ -17,7 +17,7 @@
         "pass": "certifis@123"
     },
     "blockchain": {
-        "dockerLogsURL":"http://192.168.174.128:5050"
+        "dockerLogsURL":"http://192.168.174.128:5050/containers/peer0.org1.example.com/logs?stderr=true"
     },
     "app": {
         "BlockChain_Enable": false,

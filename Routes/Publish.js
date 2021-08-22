@@ -89,6 +89,7 @@ async function PublishSingleBlockChain(req, res) {
             return res.send(`we are publishing your ${ct.title} certificate with id: ${ct._id}. You may continue what you are doing.`)
         } catch (err) {
             await cert.updateOne({ _id: req.body.id, 'issuedby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
+            await LogHandler.Log(JSON.stringify(ct), Constants.Error, err);
             throw new StatusCodeException(503, "service unavailable", Constants.PublishFailed)
         }
 
@@ -141,6 +142,7 @@ async function PublishBatchBlockChain(req, res) {
             return res.send("Processing started we will notify u soon")
         } catch (err) {
             await batch.findOneAndUpdate({ _id: req.body.id, 'createdby.org_id': req.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } }).lean();
+            await LogHandler.Log(JSON.stringify(bt), Constants.Error, err);
             throw new StatusCodeException(503, "service unavailable", Constants.PublishFailed)
         }
     }
