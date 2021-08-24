@@ -6,7 +6,7 @@
         "ca": "ca.org1.example.com"
     },
     "msgbroker": {
-        "url": "amqp://192.168.174.128:5672"
+        "url": "amqp://192.168.0.105:5672"
     },
     "database": {
         "devurl": "mongodb://localhost:27017/ecert2",
@@ -17,12 +17,12 @@
         "pass": "certifis@123"
     },
     "blockchain": {
-        "dockerLogsURL":"http://192.168.174.128:5050/containers/peer0.org1.example.com/logs?stderr=true"
+        "dockerLogsURL":"http://192.168.0.105:5050/containers/peer0.org1.example.com/logs?stderr=true"
     },
     "app": {
-        "BlockChain_Enable": false,
-        "verification_url": "https://mr-devs.ml/verification/",
-        "reset_url": "https://mr-devs.ml/reset-password",
+        "BlockChain_Enable": true,
+        "verification_url": "http://certifis.cf/verification/",
+        "reset_url": "http://certifis.cf/reset-password",
         "reset_url_expiry": 300,
         "debugging": false,
         "TokenExpiry": "2h"
