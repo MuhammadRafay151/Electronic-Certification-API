@@ -10,6 +10,8 @@ const LogHandler = require("./logsHandler");
 const Constants = require('../Constants');
 const CountHandler = require('./CountHandler');
 async function PublishBatch(obj) {
+    let isBlockChainPublished = false
+    let bt, bcert;
     try {
         let publish = {
             status: true,
@@ -17,11 +19,11 @@ async function PublishBatch(obj) {
             publisher_email: obj.user.email,
             publish_date: Date.now()
         }
-        let bt = await batch.findOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false }).lean();
+        bt = await batch.findOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false }).lean();
         if (config.get("app.debugging") === true) {
             process.send({ ...bt, message: "batch information", debugging: true });
         }
-        let bcert = await batch_cert.find({ batch_id: obj.batchid }).lean()
+        bcert = await batch_cert.find({ batch_id: obj.batchid }).lean()
         if (config.get("app.debugging") === true) {
             process.send({ _id: bt._id, candidates: [...bcert], message: "batch candidates", debugging: true });
         }
@@ -39,15 +41,8 @@ async function PublishBatch(obj) {
             process.send({ _id: bt._id, message: "Sending batch to the blockchain", debugging: true });
 
         }
-        try {
-            await batchInvoke(CryptoCert, obj.user.uid)
-        } catch (err) {
-            await Promise.all([
-                CountHandler.IncreaseCount(obj.user.org_id, bcert.length),
-                LogHandler.Log(JSON.stringify(bt), Constants.Error, err)
-            ])
-            throw err
-        }
+        await batchInvoke(CryptoCert, obj.user.uid)
+        isBlockChainPublished = true
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
         if (config.get("app.debugging") === true) {
             process.send({ _id: bt._id, message: "Batch has been published to the blockchain", debugging: true });
@@ -62,13 +57,21 @@ async function PublishBatch(obj) {
         return true
     }
     catch (err) {
-        await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
-        console.log(err)
+        let failureCompensate = [
+            batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } }),
+            LogHandler.Log(JSON.stringify(bt), Constants.Error, err)
+        ]
+        if (!isBlockChainPublished) {
+            failureCompensate.push(CountHandler.IncreaseCount(obj.user.org_id, bcert.length))
+        }
+        await Promise.all(failureCompensate)
         return false
     }
 
 }
 async function PublishSingle(obj) {
+    let isBlockChainPublished = false
+    let crt;
     try {
         let publish = {
             status: true,
@@ -76,7 +79,7 @@ async function PublishSingle(obj) {
             publisher_email: obj.user.email,
             publish_date: Date.now(),
         }
-        let crt = await cert.findOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false }).lean()
+        crt = await cert.findOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false }).lean()
         let fl = await files.find({ _id: { $in: [crt.logo, crt.signature] } }).lean()
         let logo = fl.find(obj => obj.type === "logo")
         let signature = fl.find(obj => obj.type === "signature")
@@ -89,15 +92,8 @@ async function PublishSingle(obj) {
             process.send(temp);
             process.send({ _id: crt._id, message: "Sending to blockchain", debugging: true });
         }
-        try {
-            await singleInvoke(CryptoCert, obj.user.uid)
-        } catch (err) {
-            await Promise.all([
-                CountHandler.IncreaseCount(obj.user.org_id, 1),
-                LogHandler.Log(JSON.stringify(crt), Constants.Error, err)
-            ])
-            throw err
-        }
+        await singleInvoke(CryptoCert, obj.user.uid);
+        isBlockPublished = true;
         await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
         if (config.get("app.debugging") === true) {
             let temp = { _id: crt._id, message: "Successfully published on blockchain", debugging: true };
@@ -114,8 +110,14 @@ async function PublishSingle(obj) {
         return true;
     }
     catch (err) {
-        await cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
-        console.log(err)
+        let failureCompensate = [
+            LogHandler.Log(JSON.stringify(crt), Constants.Error, err),
+            cert.updateOne({ _id: obj.certid, 'issuedby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { 'publish.processing': false } })
+        ]
+        if (!isBlockChainPublished) {
+            failureCompensate.push(CountHandler.IncreaseCount(obj.user.org_id, 1))
+        }
+        await Promise.all(failureCompensate)
         return false
     }
 
