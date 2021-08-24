@@ -18,6 +18,7 @@ async function GetPdf_Buffer(data) {
     background_img = `data:${mime.getType(template.img)};base64,${background_img}`
     var htmlRenderized = ejs.render(htmlContent, { data: data, img: background_img });
     const browser = await puppeteer.launch({
+        args:['--no-sandbox'],//adding this config for docker support
         headless: true
     })
     const page = await browser.newPage()
