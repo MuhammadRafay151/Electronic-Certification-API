@@ -9,9 +9,8 @@ const bcert = require('../models/batch_certificates')
 const auth = require('../Auth/Auth')
 const Roles = require('../js/Roles');
 
-
 router.get("/userstats", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var x = await user.aggregate([{
+    let x = await user.aggregate([{
         $facet: {
             TotalCount: [
                 { $match: { "organization.id": req.user.org_id } },
@@ -55,11 +54,11 @@ router.get("/userstats", auth.authenticateToken, auth.CheckAuthorization([Roles.
     res.json(UserStats)
 })
 router.get("/counthistory", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var CountHistory = await count.find({ Org_Id: req.user.org_id }, { _id: 0, date: 1, Count: 1 }).sort({ date: -1 }).limit(30);
+    let CountHistory = await count.find({ Org_Id: req.user.org_id }, { _id: 0, date: 1, Count: 1 }).sort({ date: 1 }).limit(30);
     res.send(CountHistory)
 })
 router.get("/countstats", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var TotalAllotedCount = await count.aggregate([
+    let TotalAllotedCount = await count.aggregate([
         { $match: { Org_Id: req.user.org_id } },
         {
             $group:
@@ -76,8 +75,8 @@ router.get("/countstats", auth.authenticateToken, auth.CheckAuthorization([Roles
             }
         }
     ]);
-    var org = await organization.findOne({ _id: req.user.org_id })
-    var CountStats = {
+    let org = await organization.findOne({ _id: req.user.org_id })
+    let CountStats = {
         TotalAllotedCount: TotalAllotedCount.length > 0 ? TotalAllotedCount[0].Count : 0,
         AvailableCount: org.ecertcount,
         TotalPublications: await PublishedCertCount(req.user.org_id)
@@ -85,27 +84,27 @@ router.get("/countstats", auth.authenticateToken, auth.CheckAuthorization([Roles
     res.json(CountStats)
 })
 router.get("/singlecreationhistory", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var temp = await SingleCreationHistory(req.user.org_id)
+    let temp = await SingleCreationHistory(req.user.org_id)
     res.json(temp)
 })
 router.get("/batchcreationhistory", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var temp = await BatchCreationHistory(req.user.org_id)
+    let temp = await BatchCreationHistory(req.user.org_id)
     res.json(temp)
 })
 router.get("/singlepublicationhistory", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var PublicationHistory = await SinglePublicationHistorys(req.user.org_id)
+    let PublicationHistory = await SinglePublicationHistorys(req.user.org_id)
     res.json(PublicationHistory)
 })
 router.get("/batchpublicationhistory", auth.authenticateToken, auth.CheckAuthorization([Roles.Admin]), async (req, res) => {
-    var PublicationHistory = await BatchPublicationHistorys(req.user.org_id)
+    let PublicationHistory = await BatchPublicationHistorys(req.user.org_id)
     res.json(PublicationHistory)
 })
 router.get("/organizationstats", auth.authenticateToken, auth.CheckAuthorization([Roles.SuperAdmin]), async (req, res) => {
-    var temp = (await OrganizationStats())[0]
+    let temp = (await OrganizationStats())[0]
     res.json(temp)
 })
 async function SingleCreationHistory(org_id) {
-    var TotalSingle = await cert.aggregate([
+    let TotalSingle = await cert.aggregate([
         { $match: { 'issuedby.org_id': org_id } },
         {
             $group: {
@@ -123,12 +122,12 @@ async function SingleCreationHistory(org_id) {
     return TotalSingle
 }
 async function BatchCreationHistory(org_id) {
-    var Batches = await batch.find({ "createdby.org_id": org_id }, { _id: 1 }).lean();
-    var batchlist = []
-    for (var x = 0; x < Batches.length; x++) {
-        batchlist.push(Batches[x]._id.toString())
+    let Batches = await batch.find({ "createdby.org_id": org_id }, { _id: 1 }).lean();
+    let batchlist = []
+    for (let x = 0; x < Batches.length; x++) {
+        batchlist.push(Batches[x]._id)
     }
-    var TotalBatchCert = await bcert.aggregate([
+    let TotalBatchCert = await bcert.aggregate([
         { $match: { 'batch_id': { $in: batchlist } } },
         {
             $group: {
@@ -146,7 +145,7 @@ async function BatchCreationHistory(org_id) {
     return TotalBatchCert
 }
 async function SinglePublicationHistorys(org_id) {
-    var TotalSinglePublications = await cert.aggregate([
+    let TotalSinglePublications = await cert.aggregate([
         { $match: { 'issuedby.org_id': org_id, 'publish.status': true } },
         {
             $group: {
@@ -164,12 +163,12 @@ async function SinglePublicationHistorys(org_id) {
     return TotalSinglePublications
 }
 async function BatchPublicationHistorys(org_id) {
-    var Batches = await batch.find({ "createdby.org_id": org_id, 'publish.status': true }, { _id: 1 }).lean();
-    var batchlist = []
-    for (var x = 0; x < Batches.length; x++) {
-        batchlist.push(Batches[x]._id.toString())
+    let Batches = await batch.find({ "createdby.org_id": org_id, 'publish.status': true }, { _id: 1 }).lean();
+    let batchlist = []
+    for (let x = 0; x < Batches.length; x++) {
+        batchlist.push(Batches[x]._id)
     }
-    var TotalBatchCertPublications = await bcert.aggregate([
+    let TotalBatchCertPublications = await bcert.aggregate([
         { $match: { 'batch_id': { $in: batchlist } } },
         {
             $group: {
@@ -188,8 +187,8 @@ async function BatchPublicationHistorys(org_id) {
 }
 async function PublishedCertCount(org_id) {
     let requests = [
-        await cert.find({ 'issuedby.org_id': org_id, 'publish.status': true }).countDocuments(),
-        await batch.aggregate([
+        cert.find({ 'issuedby.org_id': org_id, 'publish.status': true }).countDocuments(),
+        batch.aggregate([
             { $match: { "createdby.org_id": org_id, 'publish.status': true } },
             {
                 $lookup:
