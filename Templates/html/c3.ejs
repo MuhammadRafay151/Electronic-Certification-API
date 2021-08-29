@@ -8,7 +8,7 @@
   </div>
 
   <p class="p2 ">
-    issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
+    Publish Date: <%= new Date(data.publish.publish_date).toLocaleDateString() %>
   </p>
 
   <p class="p3 ">
@@ -24,6 +24,10 @@
 </div>
 
 <style>
+  body {
+    font-family: 'Times New Roman', Times, serif;
+  }
+
   .cert {
     width: 29.7cm;
     height: 21cm;
@@ -43,7 +47,6 @@
     color: black;
     left: 0;
     right: 0;
-    font-size: 22px;
     font-family: 'Comfortaa';
     height: 555px;
     /* Assign a value */
