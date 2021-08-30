@@ -8,12 +8,11 @@
     </div>
 
     <p class="p2 ">
-        issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
-
+        Publish Date: <%= new Date(data.publish.publish_date).toLocaleDateString() %>
     </p>
 
     <p class="p3 ">
-        verfication code: <%=data._id %>
+        Verfication Code: <%=data._id %>
     </p>
 
     <div>
@@ -25,6 +24,10 @@
 </div>
 
 <style>
+    body {
+        font-family: 'Times New Roman', Times, serif;
+    }
+
     .cert {
         width: 29.7cm;
         height: 21cm;
@@ -32,8 +35,8 @@
 
     .logo {
         position: absolute;
-        top: 85.666px;
-        left: 22.204cm;
+        top: 1.0cm;
+        left: 24.5cm;
         object-fit: contain;
     }
 
@@ -42,10 +45,10 @@
         top: 2%;
         left: 2%;
         color: black;
-        font-size: 22px;
+        /* font-size: 22px; */
         height: 555px;
         /* Assign a value */
-        width: 68%;
+        width: 620px;
         word-wrap: break-word;
         font-family: "Kano regular";
     }
@@ -82,7 +85,7 @@
 
     .isign {
         position: absolute;
-        top: 650px;
+        top: 620px;
         right: 1.06cm;
         object-fit: contain;
     }

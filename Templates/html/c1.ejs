@@ -10,11 +10,11 @@
   </div>
 
   <p class="p2 ">
-    issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
+    Publish Date: <%= new Date(data.publish.publish_date).toLocaleDateString() %>
   </p>
 
   <p class="p3 ">
-    verfication code: <%=data._id %>
+    Verfication Code: <%=data._id %>
   </p>
 
   <div>
@@ -61,10 +61,10 @@
     color: black;
     left: 0;
     right: 0;
-    font-size: 22px;
     height: 555px;
+    font-family: "Times New Roman";
     /* Assign a value */
-    width: 802px;
+    width: 720px;
     word-wrap: break-word;
     margin: auto;
   }
@@ -83,12 +83,21 @@
     overflow-y: hidden;
   }
 
+  .p2 {
+    position: absolute;
+    top: 700px;
+    color: black;
+    left: 30px;
+    font-family: "Times New Roman";
+  }
+
 
   .p3 {
     position: absolute;
     top: 730px;
     color: black;
     left: 30px;
+    font-family: "Times New Roman";
   }
 
   @media print {

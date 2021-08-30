@@ -8,11 +8,11 @@
   </div>
 
   <p class="p2 ">
-    issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
+    Publish Date: <%= new Date(data.publish.publish_date).toLocaleDateString() %>
   </p>
 
   <p class="p3 ">
-    verfication code: <%=data._id %>
+    Verfication Code: <%=data._id %>
   </p>
 
   <div>
@@ -31,19 +31,20 @@
 
   .logo {
     position: absolute;
-    top: 20px;
-    left: 13.094cm;
+    top: 100px;
+    left: 0;
+    right: 0;
+    margin: auto;
     object-fit: contain;
   }
 
   .template {
     position: absolute;
-    top: 25%;
+    top: 180px;
     left: 20px;
     color: black;
     left: 0;
     right: 0;
-    font-size: 22px;
     font-family: 'Comfortaa';
     height: 555px;
     /* Assign a value */

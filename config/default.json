@@ -10,7 +10,7 @@
     },
     "database": {
         "devurl": "mongodb://localhost:27017/ecert2",
-        "url": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert2?retryWrites=true&w=majority"
+        "url": "mongodb+srv://Admin1:15DhA4X99ApnacqZ@certifiscluster.btf5x.mongodb.net/ecert2-dev?retryWrites=true&w=majority"
     },
     "email": {
         "user": "certifis.cf@gmail.com",
@@ -20,7 +20,7 @@
         "dockerLogsURL":"http://192.168.0.105:5050/containers/peer0.org1.example.com/logs?stderr=true"
     },
     "app": {
-        "BlockChain_Enable": true,
+        "BlockChain_Enable": false,
         "verification_url": "http://certifis.cf/verification/",
         "reset_url": "http://certifis.cf/reset-password",
         "reset_url_expiry": 300,

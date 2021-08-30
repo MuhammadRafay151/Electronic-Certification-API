@@ -10,7 +10,7 @@ const templates = [
     {
         id: "c2",
         html: "c2.ejs",
-        img: "c2.jpg",
+        img: "c2.png",
         TitleLength: 32,
         NameLength: 70,
         DiscriptionLength: 1349,

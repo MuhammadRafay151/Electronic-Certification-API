@@ -7,12 +7,11 @@
         <%- data.template %>
     </div>
     <p class="p2 ">
-        issue_date: <%= new Date(data.issue_date).toLocaleDateString() %>
-
+        Publish Date: <%= new Date(data.publish.publish_date).toLocaleDateString() %>
     </p>
 
     <p class="p3 ">
-        verfication code: <%=data._id %>
+        Verfication Code: <%=data._id %>
     </p>
 
     <div>
@@ -31,22 +30,23 @@
 
     .logo {
         position: absolute;
-        top: 70px;
-        left: 13.094cm;
+        top: 120px;
+        left: 0;
+        right: 0;
+        margin: auto;
         object-fit: contain;
     }
 
     .template {
         position: absolute;
         top: 30%;
-        left: 20px;
+        left: 23px;
         color: black;
         left: 0;
         right: 0;
-        font-size: 22px;
         height: 555px;
         /* Assign a value */
-        width: 85%;
+        width: 790px;
         word-wrap: break-word;
         margin: auto;
         font-family: "Century Gothic";
@@ -58,7 +58,6 @@
         color: black;
         left: 2.5cm;
         font-family: 'Century Gothic';
-        font-size: 15px;
     }
 
     .p3 {
@@ -67,7 +66,6 @@
         color: black;
         left: 2.5cm;
         font-family: 'Century Gothic';
-        font-size: 15px;
     }
 
     .sign {
@@ -76,7 +74,6 @@
         right: 2.5cm;
         color: black;
         font-family: 'Century Gothic';
-        font-size: 15px;
     }
 
     .isign {
@@ -92,7 +89,6 @@
         color: white;
         width: 29.7cm;
         height: 21cm;
-
     }
 
     @media print {
