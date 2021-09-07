@@ -41,7 +41,9 @@ async function PublishBatch(obj) {
             process.send({ _id: bt._id, message: "Sending batch to the blockchain", debugging: true });
 
         }
-        await batchInvoke(CryptoCert, obj.user.uid)
+        for (let i = 0; i < CryptoCert.length; i++) {
+            await singleInvoke(CryptoCert[i], obj.user.uid)
+        }
         isBlockChainPublished = true
         await batch.updateOne({ _id: obj.batchid, 'createdby.org_id': obj.user.org_id, 'publish.status': false, 'publish.processing': true }, { $set: { publish: { ...publish, processing: false } } })
         if (config.get("app.debugging") === true) {
